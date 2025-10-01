@@ -80,24 +80,75 @@ class ThreadsHandler {
   }
 
   async postCommentHandler(request, h) {
-    const { id: owner } = request.auth.credentials;
-    const { threadId } = request.params;
-    const addCommentUseCase = this._container.getInstance(
-      AddCommentUseCase.name
-    );
-    const addedComment = await addCommentUseCase.execute(
-      request.payload,
-      threadId,
-      owner
-    );
-    const response = h.response({
-      status: "success",
-      data: {
-        addedComment,
-      },
-    });
-    response.code(201);
-    return response;
+    try {
+      const { id: owner } = request.auth.credentials;
+      const { threadId } = request.params;
+      // cek ketersediaan thread
+      const getThreadUseCase = this._container.getInstance(
+        GetThreadUseCase.name
+      );
+      await getThreadUseCase.execute(threadId);
+
+      // validasi payload
+      const { content } = request.payload || {};
+      if (typeof content !== "string" || !content) {
+        const response = h.response({
+          status: "fail",
+          message: "payload tidak valid",
+        });
+        response.code(400);
+        return response;
+      }
+
+      const addCommentUseCase = this._container.getInstance(
+        AddCommentUseCase.name
+      );
+      const addedComment = await addCommentUseCase.execute(
+        request.payload,
+        threadId,
+        owner
+      );
+      const response = h.response({
+        status: "success",
+        data: {
+          addedComment,
+        },
+      });
+      response.code(201);
+      return response;
+    } catch (error) {
+      if (error.name === "NotFoundError") {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(404);
+        return response;
+      }
+      if (
+        error.message &&
+        error.message.startsWith("ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY")
+      ) {
+        const response = h.response({
+          status: "fail",
+          message: "content, threadId, dan owner harus ada",
+        });
+        response.code(400);
+        return response;
+      }
+      if (
+        error.message &&
+        error.message.startsWith("ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION")
+      ) {
+        const response = h.response({
+          status: "fail",
+          message: "content, threadId, dan owner harus bertipe string",
+        });
+        response.code(400);
+        return response;
+      }
+      throw error;
+    }
   }
 
   async deleteCommentHandler(request, h) {
