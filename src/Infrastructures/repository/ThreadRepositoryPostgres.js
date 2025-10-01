@@ -114,6 +114,19 @@ class ThreadRepositoryPostgres extends ThreadRepository {
       date: new Date(row.date).toISOString(),
     }));
   }
+
+  async verifyCommentAvailability(commentId) {
+    const query = {
+      text: "SELECT 1 FROM comments WHERE id = $1",
+      values: [commentId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError("komentar tidak ditemukan");
+    }
+  }
 }
 
 module.exports = ThreadRepositoryPostgres;
