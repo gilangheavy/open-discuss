@@ -1,342 +1,111 @@
-Garuda Game (perusahaan fiktif) merupakan sebuah perusahaan paling sukses dalam menjalankan bisnis di bidang online game. Perusahaan tersebut memiliki ratusan game yang dimainkan oleh jutaan pengguna di seluruh dunia. Salah satu kunci keberhasilan Garuda Game adalah dekat dengan para pemainnya. Mereka berhasil membangun komunitas yang aktif.
+# Open Discuss — Forum API
 
-Untuk menjaga kualitas layanan terhadap komunitas, Garuda Game berinisiatif untuk membangun aplikasi diskusi atau forum untuk para pemain. Dengan hadirnya platform diskusi yang resmi, para pemain akan sangat terbantu dan merasa nyaman untuk berdiskusi perihal game yang mereka mainkan. Aplikasi forum akan tersedia di platform web ataupun mobile native.
+Backend API built with Hapi, PostgreSQL, and JWT authentication. Includes users, authentications, threads, comments, and replies.
 
-Garuda Game ingin aplikasi forum didesain secara matang. Seperti menerapkan automation testing, menerapkan clean architecture. Dengan begitu, aplikasi ini bisa terhindar dari bug, mudah beradaptasi pada perubahan teknologi, dan mudah untuk dikembangkan.
+## Prerequisites
 
-Untuk mencapai itu, Garuda Game menghadirkan talenta terbaik dalam membangun aplikasi forum. Salah satunya adalah Anda yang ditugaskan untuk membangun Back-End API guna mendukung fungsionalitas dari aplikasi Front-End.
+- Node.js 14+ (LTS recommended)
+- PostgreSQL 12+
 
-Aplikasi forum dikembangkan secara bertahap dan saat ini diharapkan sudah memiliki fitur:
+## Environment variables
 
-- Registrasi Pengguna;
-- Login dan Logout;
-- Menambahkan Thread;
-- Melihat Thread;
-- Menambahkan dan Menghapus Komentar pada Thread; serta
-- Menambahkan dan Menghapus Balasan Komentar Thread (opsional).
-
-# Kriteria Forum API
-
-Terdapat 6 kriteria utama yang harus Anda penuhi dalam membuat proyek Forum API.
-
-## Kriteria 1: Menambahkan Thread
-
-API harus dapat menambahkan thread melalui route:
-
-- Method: POST
-- Path: /threads
-- Body Request:
+Create a `.env` file in the project root with at least the following variables (values are examples):
 
 ```
-{
-    "title": string,
-    "body": string
-}
+# Server
+HOST=localhost
+PORT=4000
+
+# JWT
+ACCESS_TOKEN_KEY=supersecretaccesstokenkey
+ACCESS_TOKEN_AGE=3600
+REFRESH_TOKEN_KEY=supersecretrefreshtokenkey
+
+# Postgres (development)
+PGHOST=localhost
+PGPORT=5432
+PGUSER=developer
+PGPASSWORD=supersecretpassword
+PGDATABASE=forumapi
+
+# Postgres (tests)
+PGHOST_TEST=localhost
+PGPORT_TEST=5432
+PGUSER_TEST=developer
+PGPASSWORD_TEST=supersecretpassword
+PGDATABASE_TEST=forumapi_test
 ```
 
-Response yang harus dikembalikan:
+Also ensure your test DB config matches `config/database/test.json`.
 
-- Status Code: 201
-- Response Body:
-
-```
-{
-    "status": "success",
-    "data": {
-        "addedThread": {
-            "id": "thread-h_W1Plfpj0TY7wyT2PUPX",
-            "title": "sebuah thread",
-            "owner": "user-DWrT3pXe1hccYkV1eIAxS"
-        }
-    }
-}
+## Install dependencies
 
 ```
-
-Ketentuan:
-
-Menambahkan thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang membuat thread.
-Jika properti body request tidak lengkap atau tidak sesuai, maka:
-Kembalikan dengan status code 400; serta
-Berikan body response: 
-status: “fail”
-message: Pesan apapun selama tidak kosong.
-
-## Kriteria 2: Menambahkan Komentar pada Thread
-
-API harus dapat menambahkan komentar pada thread melalui route:
-
-- Method: POST
-- Path: /threads/{threadId}/comments
-- Body Request:
-
-```
-{
-    "content": string
-}
+npm install
 ```
 
-Response yang harus dikembalikan:
+## Database setup
 
-- Status Code: 201
-- Response Body:
-
-```
-{
-    "status": "success",
-    "data": {
-        "addedComment": {
-            "id": "comment-_pby2_tmXV6bcvcdev8xk",
-            "content": "sebuah comment",
-            "owner": "user-CrkY5iAgOdMqv36bIvys2"
-        }
-    }
-}
-```
-
-Ketentuan:
-
-Menambahkan komentar pada thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang membuat komentar.
-
-- Kembalikan dengan status code 404; serta
-- Berikan body response:
-  - status: “fail”
-  - message: Pesan apapun selama tidak kosong.
-
-Jika properti body request tidak lengkap atau tidak sesuai, maka:
-
-- Kembalikan dengan status code 400; serta
-- Berikan body response:
-  - status: “fail”
-  - message: Pesan apapun selama tidak kosong.
-
-## Kriteria 3: Menghapus Komentar pada Thread
-
-API harus dapat menghapus komentar pada thread melalui route:
-
-- Method: DELETE
-- Path: /threads/{threadId}/comments/{commentId}
-
-Response yang harus dikembalikan:
-
-- Status Code: 200
-- Response Body:
+Create the databases if they don’t exist yet (names should match your env and `config/database/test.json`):
 
 ```
-{
-    "status": "success"
-}
+createdb forumapi
+createdb forumapi_test
 ```
 
-Ketentuan:
-
-- Menghapus komentar pada thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang menghapus komentar.
-- Hanya pemilik komentar yang dapat menghapus komentar. Bila bukan pemilik komentar, maka:
-  - Kembalikan dengan status code 403; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Jika thread atau komentar yang hendak dihapus tidak ada atau tidak valid, maka:
-  - Kembalikan dengan status code 404; serta
-  - Berikan body response: - status: “fail” - message: Pesan apapun selama tidak kosong.
-- Komentar dihapus secara soft delete, alias tidak benar-benar dihapus dari database. Anda bisa membuat dan memanfaatkan kolom seperti `is_delete` sebagai indikator apakah komentar dihapus atau tidak.
-
-## Kriteria 4: Melihat Detail Thread
-
-API harus dapat melihat detail thread melalui route:
-
-- Method: GET
-- Path: /threads/{threadId}
-
-Response yang harus dikembalikan:
-
-- Status Code: 200
-- Response Body:
+Run migrations:
 
 ```
-{
-    "status": "success",
-    "data": {
-        "thread": {
-            "id": "thread-h_2FkLZhtgBKY2kh4CC02",
-            "title": "sebuah thread",
-            "body": "sebuah body thread",
-            "date": "2021-08-08T07:19:09.775Z",
-            "username": "dicoding",
-            "comments": [
-                {
-                    "id": "comment-_pby2_tmXV6bcvcdev8xk",
-                    "username": "johndoe",
-                    "date": "2021-08-08T07:22:33.555Z",
-                    "content": "sebuah comment"
-                },
-                {
-                    "id": "comment-yksuCoxM2s4MMrZJO-qVD",
-                    "username": "dicoding",
-                    "date": "2021-08-08T07:26:21.338Z",
-                    "content": "**komentar telah dihapus**"
-                }
-            ]
-        }
-    }
-}
+# Development DB
+npm run migrate
+
+# Test DB
+npm run migrate:test
 ```
 
-Ketentuan:
-
-- Mendapatkan detail thread merupakan resource terbuka. Sehingga tidak perlu melampirkan access token.
-- Jika thread yang diakses tidak ada atau tidak valid, maka:
-  - Kembalikan dengan status code 404; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Wajib menampilkan seluruh komentar yang terdapat pada thread tersebut sesuai dengan contoh di atas.
-- Komentar yang dihapus ditampilkan dengan konten **komentar telah dihapus**.
-- Komentar diurutkan secara ascending (dari kecil ke besar) berdasarkan waktu berkomentar.
-
-## Kriteria 5: Menerapkan Automation Testing
-
-Proyek Forum API wajib menerapkan automation testing dengan kriteria berikut:
-
-- Unit Testing:
-  - Wajib menerapkan Unit Testing pada bisnis logika yang ada. Baik di Entities ataupun di Use Case.
-- Integration Test:
-  - Wajib menerapkan Integration Test dalam menguji interaksi database dengan Repository.
-
-## Kriteria 6: Menerapkan Clean Architecture
-
-Proyek Forum API wajib menerapkan Clean Architecture. Di mana source code terdiri dari 4 layer yaitu:
-
-- Entities (jika dibutuhkan)
-  - Tempat penyimpanan data entitas bisnis utama. Jika suatu bisnis butuh mengelola struktur data yang kompleks, maka buatlah entities.
-- Use Case:
-  - Di gunakan sebagai tempat menuliskannya flow atau alur bisnis logika.
-- Interface Adapter (Repository dan Handler)
-  - Mediator atau penghubung antara layer framework dengan layer use case.
-- Frameworks (Database dan HTTP server)
-  - Level paling luar merupakan bagian yang berhubungan dengan framework.
-
-## Kriteria Opsional Forum API
-
-Selain kriteria utama, terdapat kriteria opsional yang yang dapat Anda penuhi agar mendapat nilai yang baik.
-
-## Opsional 1 : Menambahkan Balasan pada Komentar Thread
-
-API harus dapat menambahkan balasan pada komentar thread melalui route:
-
-- Method: POST
-- Path: /threads/{threadId}/comments/{commentId}/replies
-- Body Request:
+## Run the server
 
 ```
-{
-    "content": string
-}
+# Dev (with reload)
+npm run start:dev
+
+# Production-like
+npm start
 ```
 
-Response yang harus dikembalikan:
+The API will listen on `http://HOST:PORT` (default `http://localhost:4000`).
 
-- Status Code: 201
-- Response Body:
-
-```
-{
-    "status": "success",
-    "data": {
-        "addedReply": {
-            "id": "reply-BErOXUSefjwWGW1Z10Ihk",
-            "content": "sebuah balasan",
-            "owner": "user-CrkY5iAgOdMqv36bIvys2"
-        }
-    }
-}
-```
-
-**Ketentuan:**
-
-- Menambahkan balasan pada komentar thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang membuat balasan komentar.
-- Jika thread atau komentar yang diberi balasan tidak ada atau tidak valid, maka:
-  - Kembalikan dengan status code 404; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Jika properti body request tidak lengkap atau tidak sesuai, maka:
-  - Kembalikan dengan status code 400; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Balasan pada komentar thread harus ditampilkan pada setiap item comments ketika mengakses detail thread. Contohnya seperti ini:
+## Run tests
 
 ```
-{
-    "status": "success",
-    "data": {
-        "thread": {
-            "id": "thread-AqVg2b9JyQXR6wSQ2TmH4",
-            "title": "sebuah thread",
-            "body": "sebuah body thread",
-            "date": "2021-08-08T07:59:16.198Z",
-            "username": "dicoding",
-            "comments": [
-                {
-                    "id": "comment-q_0uToswNf6i24RDYZJI3",
-                    "username": "dicoding",
-                    "date": "2021-08-08T07:59:18.982Z",
-                    "replies": [
-                        {
-                            "id": "reply-BErOXUSefjwWGW1Z10Ihk",
-                            "content": "**balasan telah dihapus**",
-                            "date": "2021-08-08T07:59:48.766Z",
-                            "username": "johndoe"
-                        },
-                        {
-                            "id": "reply-xNBtm9HPR-492AeiimpfN",
-                            "content": "sebuah balasan",
-                            "date": "2021-08-08T08:07:01.522Z",
-                            "username": "dicoding"
-                        }
-                    ],
-                    "content": "sebuah comment"
-                }
-            ]
-        }
-    }
-}
-
+npm test
 ```
 
-- Balasan yang dihapus ditampilkan dengan konten **balasan telah dihapus**.
-- Balasan diurutkan secara ascending (dari kecil ke besar) berdasarkan waktu berkomentar.
+Notes:
 
-## Opsional 2 : Menghapus Balasan pada Komentar Thread
+- Tests connect to the test database using `PG*_TEST` variables.
+- Ensure you’ve run `npm run migrate:test` before running tests.
 
-API harus dapat menghapus balasan pada komentar thread melalui route:
+## API overview
 
-- Method: DELETE
-- Path: /threads/{threadId}/comments/{commentId}/replies/{replyId}
+- POST /users — register user
+- POST /authentications — login (returns accessToken, refreshToken)
+- PUT /authentications — refresh access token
+- DELETE /authentications — logout (delete refresh token)
+- POST /threads — create thread (Bearer access token)
+- GET /threads/{threadId} — get thread detail (with comments and replies)
+- POST /threads/{threadId}/comments — add comment (Bearer access token)
+- DELETE /threads/{threadId}/comments/{commentId} — delete comment (soft delete)
+- POST /threads/{threadId}/comments/{commentId}/replies — add reply (Bearer access token)
+- DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId} — delete reply (soft delete)
 
-Response yang harus dikembalikan:
+Deleted comments/replies are masked as `**komentar telah dihapus**` and `**balasan telah dihapus**` in the thread detail.
 
-- Status Code: 200
-- Response Body:
+## Postman collection
 
-```
-{
-    "status": "success"
-}
-```
+Import `Forum API V1 Test.postman_collection.json` to run end-to-end requests. Set the following variables in your Postman environment: `protocol` (http), `host` (localhost), `port` (4000), and data like `newUsername`, `newPassword`, etc. The collection includes tests for success and error paths.
 
-**Ketentuan:**
+## Troubleshooting
 
-- Menghapus balasan pada komentar thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang menghapus balasan.
-- Hanya pemilik balasan yang dapat menghapus balasan. Bila bukan pemilik balasan, maka:
-  - Kembalikan dengan status code 403; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Jika thread, komentar, atau balasan yang hendak dihapus tidak ada atau tidak valid, maka:
-  - Kembalikan dengan status code 404; serta
-  - Berikan body response:
-    - status: “fail”
-    - message: Pesan apapun selama tidak kosong.
-- Balasan dihapus secara soft delete, alias tidak benar-benar dihapus dari database. Anda bisa membuat dan memanfaatkan kolom seperti is_delete sebagai indikator apakah komentar dihapus atau tidak.
+- 500 on POST /threads or other endpoints: ensure DB migrations have been applied (`npm run migrate`) and your JWT keys match those used to sign tokens.
+- Unauthorized (401): include `Authorization: Bearer <accessToken>` header for protected endpoints.
