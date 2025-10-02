@@ -11,7 +11,7 @@ const CommentsTableTestHelper = {
     date = "2023-01-01T00:00:00.000Z",
   }) {
     const query = {
-      text: "INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6)",
+      text: "INSERT INTO comments (id, thread_id, content, owner, is_delete, date) VALUES($1, $2, $3, $4, $5, $6)",
       values: [id, threadId, content, owner, isDelete, date],
     };
 

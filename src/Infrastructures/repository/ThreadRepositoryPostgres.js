@@ -17,7 +17,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const id = `thread-${this._idGenerator()}`;
 
     const query = {
-      text: "INSERT INTO threads VALUES($1, $2, $3, $4) RETURNING id, title, owner",
+      text: "INSERT INTO threads (id, title, body, owner) VALUES($1, $2, $3, $4) RETURNING id, title, owner",
       values: [id, title, body, owner],
     };
 
@@ -70,7 +70,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const date = new Date().toISOString();
 
     const query = {
-      text: "INSERT INTO comments VALUES($1, $2, $3, $4, $5, $6) RETURNING id, content, owner",
+      text: "INSERT INTO comments (id, thread_id, content, owner, is_delete, date) VALUES($1, $2, $3, $4, $5, $6) RETURNING id, content, owner",
       values: [id, threadId, content, owner, false, date],
     };
 
@@ -108,15 +108,23 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getCommentsByThreadId(threadId) {
     const query = {
-      text: "SELECT comments.id, users.username, comments.date, comments.content, comments.is_delete FROM comments LEFT JOIN users ON comments.owner = users.id WHERE comments.thread_id = $1 ORDER BY comments.date ASC",
+      text:
+        "SELECT comments.id, users.username, " +
+        "to_char(comments.date AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') as date_text, " +
+        "comments.content, comments.is_delete " +
+        "FROM comments LEFT JOIN users ON comments.owner = users.id " +
+        "WHERE comments.thread_id = $1 ORDER BY comments.date ASC",
       values: [threadId],
     };
 
     const result = await this._pool.query(query);
 
     return result.rows.map((row) => ({
-      ...row,
-      date: new Date(row.date).toISOString(),
+      id: row.id,
+      username: row.username,
+      date: row.date_text,
+      content: row.content,
+      is_delete: row.is_delete,
     }));
   }
 

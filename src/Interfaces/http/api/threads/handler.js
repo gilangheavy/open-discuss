@@ -5,6 +5,7 @@ const GetThreadUseCase = require("../../../../Applications/use_case/GetThreadUse
 const AddCommentUseCase = require("../../../../Applications/use_case/AddCommentUseCase");
 const DeleteCommentUseCase = require("../../../../Applications/use_case/DeleteCommentUseCase");
 const ThreadRepository = require("../../../../Domains/threads/ThreadRepository");
+const ReplyRepository = require("../../../../Domains/replies/ReplyRepository");
 
 class ThreadsHandler {
   constructor(container) {
@@ -76,20 +77,38 @@ class ThreadsHandler {
       const threadRepository = this._container.getInstance(
         ThreadRepository.name
       );
+      const replyRepository = this._container.getInstance(ReplyRepository.name);
       const thread = await getThreadUseCase.execute(request.params.threadId);
       // ambil semua komentar pada thread
       const commentsRaw = await threadRepository.getCommentsByThreadId(
         request.params.threadId
       );
-      // mapping sesuai kriteria
-      const comments = commentsRaw.map((comment) => ({
-        id: comment.id,
-        username: comment.username,
-        date: comment.date,
-        content: comment.is_delete
-          ? "**komentar telah dihapus**"
-          : comment.content,
-      }));
+      // mapping sesuai kriteria + ambil replies per komentar
+      const comments = await Promise.all(
+        commentsRaw.map(async (comment) => {
+          const repliesRaw = await replyRepository.getRepliesByCommentId(
+            comment.id
+          );
+          const replies = repliesRaw.map((reply) => ({
+            id: reply.id,
+            content: reply.is_delete
+              ? "**balasan telah dihapus**"
+              : reply.content,
+            date: reply.date,
+            username: reply.username,
+          }));
+
+          return {
+            id: comment.id,
+            username: comment.username,
+            date: comment.date,
+            content: comment.is_delete
+              ? "**komentar telah dihapus**"
+              : comment.content,
+            replies,
+          };
+        })
+      );
       // urutkan ascending
       comments.sort((a, b) => new Date(a.date) - new Date(b.date));
       // response sesuai kriteria
