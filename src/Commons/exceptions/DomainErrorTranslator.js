@@ -45,6 +45,12 @@ DomainErrorTranslator._directories = {
   "ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
     "tidak dapat menambah komentar karena tipe data tidak sesuai"
   ),
+  "ADD_REPLY.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
+    "tidak dapat menambah balasan karena properti yang dibutuhkan tidak ada"
+  ),
+  "ADD_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
+    "tidak dapat menambah balasan karena tipe data tidak sesuai"
+  ),
   "THREAD.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
     "tidak dapat membuat thread baru karena properti yang dibutuhkan tidak ada"
   ),
@@ -56,6 +62,15 @@ DomainErrorTranslator._directories = {
   ),
   "ADDED_THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION": new InvariantError(
     "thread memiliki tipe data yang tidak sesuai"
+  ),
+  "ADDED_REPLY.NOT_CONTAIN_NEEDED_PROPERTY": new InvariantError(
+    "balasan tidak memiliki properti yang dibutuhkan"
+  ),
+  "Kredensial yang Anda berikan salah": new InvariantError(
+    "kredensial yang Anda berikan salah"
+  ),
+  "Anda tidak berhak mengakses resource ini": new InvariantError(
+    "Anda tidak berhak mengakses resource ini"
   ),
 };
 

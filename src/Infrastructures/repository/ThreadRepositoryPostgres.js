@@ -53,8 +53,13 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
     const thread = result.rows[0];
 
+    // ensure date is a Date object for Thread entity validation
+    const threadDate =
+      thread.date instanceof Date ? thread.date : new Date(thread.date);
+
     return new Thread({
       ...thread,
+      date: threadDate,
       comments: [], // Will be filled later by comment repository
     });
   }

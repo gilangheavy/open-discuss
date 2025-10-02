@@ -4,6 +4,7 @@ const AddThreadUseCase = require("../../../../Applications/use_case/AddThreadUse
 const GetThreadUseCase = require("../../../../Applications/use_case/GetThreadUseCase");
 const AddCommentUseCase = require("../../../../Applications/use_case/AddCommentUseCase");
 const DeleteCommentUseCase = require("../../../../Applications/use_case/DeleteCommentUseCase");
+const ThreadRepository = require("../../../../Domains/threads/ThreadRepository");
 
 class ThreadsHandler {
   constructor(container) {
@@ -67,16 +68,63 @@ class ThreadsHandler {
     return response;
   }
 
-  async getThreadByIdHandler(request) {
-    const getThreadUseCase = this._container.getInstance(GetThreadUseCase.name);
-    const thread = await getThreadUseCase.execute(request.params.threadId);
-
-    return {
-      status: "success",
-      data: {
-        thread,
-      },
-    };
+  async getThreadByIdHandler(request, h) {
+    try {
+      const getThreadUseCase = this._container.getInstance(
+        GetThreadUseCase.name
+      );
+      const threadRepository = this._container.getInstance(
+        ThreadRepository.name
+      );
+      const thread = await getThreadUseCase.execute(request.params.threadId);
+      // ambil semua komentar pada thread
+      const commentsRaw = await threadRepository.getCommentsByThreadId(
+        request.params.threadId
+      );
+      // mapping sesuai kriteria
+      const comments = commentsRaw.map((comment) => ({
+        id: comment.id,
+        username: comment.username,
+        date: comment.date,
+        content: comment.is_delete
+          ? "**komentar telah dihapus**"
+          : comment.content,
+      }));
+      // urutkan ascending
+      comments.sort((a, b) => new Date(a.date) - new Date(b.date));
+      // response sesuai kriteria
+      const response = h.response({
+        status: "success",
+        data: {
+          thread: {
+            id: thread.id,
+            title: thread.title,
+            body: thread.body,
+            date:
+              thread.date instanceof Date
+                ? thread.date.toISOString()
+                : thread.date,
+            username: thread.username,
+            comments,
+          },
+        },
+      });
+      response.code(200);
+      return response;
+    } catch (error) {
+      if (error.name === "NotFoundError") {
+        const response = h.response({
+          status: "fail",
+          message: error.message,
+        });
+        response.code(404);
+        return response;
+      }
+      // log unexpected error for debugging
+      // eslint-disable-next-line no-console
+      console.error("getThreadByIdHandler unexpected error:", error);
+      throw error;
+    }
   }
 
   async postCommentHandler(request, h) {
