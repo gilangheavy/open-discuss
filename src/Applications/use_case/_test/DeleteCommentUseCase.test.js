@@ -1,4 +1,5 @@
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
+const CommentRepository = require("../../../Domains/comments/CommentRepository");
 const DeleteCommentUseCase = require("../DeleteCommentUseCase");
 
 describe("DeleteCommentUseCase", () => {
@@ -9,22 +10,24 @@ describe("DeleteCommentUseCase", () => {
     const owner = "user-123";
 
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
 
     mockThreadRepository.verifyThreadAvailability = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.verifyCommentAvailability = jest
+    mockCommentRepository.verifyCommentAvailability = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.verifyCommentOwner = jest
+    mockCommentRepository.verifyCommentOwner = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
-    mockThreadRepository.deleteComment = jest
+    mockCommentRepository.deleteComment = jest
       .fn()
       .mockImplementation(() => Promise.resolve());
 
     const deleteCommentUseCase = new DeleteCommentUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
     });
 
     // Action
@@ -34,13 +37,13 @@ describe("DeleteCommentUseCase", () => {
     expect(mockThreadRepository.verifyThreadAvailability).toBeCalledWith(
       threadId
     );
-    expect(mockThreadRepository.verifyCommentAvailability).toBeCalledWith(
+    expect(mockCommentRepository.verifyCommentAvailability).toBeCalledWith(
       commentId
     );
-    expect(mockThreadRepository.verifyCommentOwner).toBeCalledWith(
+    expect(mockCommentRepository.verifyCommentOwner).toBeCalledWith(
       commentId,
       owner
     );
-    expect(mockThreadRepository.deleteComment).toBeCalledWith(commentId);
+    expect(mockCommentRepository.deleteComment).toBeCalledWith(commentId);
   });
 });

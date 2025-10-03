@@ -11,10 +11,12 @@ const pool = require("./database/postgres/pool");
 // service (repository, helper, manager, etc)
 const UserRepository = require("../Domains/users/UserRepository");
 const ThreadRepository = require("../Domains/threads/ThreadRepository");
+const CommentRepository = require("../Domains/comments/CommentRepository");
 const ReplyRepository = require("../Domains/replies/ReplyRepository");
 const PasswordHash = require("../Applications/security/PasswordHash");
 const UserRepositoryPostgres = require("./repository/UserRepositoryPostgres");
 const ThreadRepositoryPostgres = require("./repository/ThreadRepositoryPostgres");
+const CommentRepositoryPostgres = require("./repository/CommentRepositoryPostgres");
 const ReplyRepositoryPostgres = require("./repository/ReplyRepositoryPostgres");
 const BcryptPasswordHash = require("./security/BcryptPasswordHash");
 
@@ -89,6 +91,20 @@ container.register([
   {
     key: ThreadRepository.name,
     Class: ThreadRepositoryPostgres,
+    parameter: {
+      dependencies: [
+        {
+          concrete: pool,
+        },
+        {
+          concrete: nanoid,
+        },
+      ],
+    },
+  },
+  {
+    key: CommentRepository.name,
+    Class: CommentRepositoryPostgres,
     parameter: {
       dependencies: [
         {
@@ -230,6 +246,10 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepository.name,
         },
+        {
+          name: "commentRepository",
+          internal: CommentRepository.name,
+        },
       ],
     },
   },
@@ -243,6 +263,10 @@ container.register([
           name: "threadRepository",
           internal: ThreadRepository.name,
         },
+        {
+          name: "commentRepository",
+          internal: CommentRepository.name,
+        },
       ],
     },
   },
@@ -255,6 +279,10 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepository.name,
+        },
+        {
+          name: "commentRepository",
+          internal: CommentRepository.name,
         },
         {
           name: "replyRepository",
@@ -272,6 +300,10 @@ container.register([
         {
           name: "threadRepository",
           internal: ThreadRepository.name,
+        },
+        {
+          name: "commentRepository",
+          internal: CommentRepository.name,
         },
         {
           name: "replyRepository",

@@ -4,7 +4,7 @@ const AddThreadUseCase = require("../../../../Applications/use_case/AddThreadUse
 const GetThreadUseCase = require("../../../../Applications/use_case/GetThreadUseCase");
 const AddCommentUseCase = require("../../../../Applications/use_case/AddCommentUseCase");
 const DeleteCommentUseCase = require("../../../../Applications/use_case/DeleteCommentUseCase");
-const ThreadRepository = require("../../../../Domains/threads/ThreadRepository");
+const CommentRepository = require("../../../../Domains/comments/CommentRepository");
 const ReplyRepository = require("../../../../Domains/replies/ReplyRepository");
 
 class ThreadsHandler {
@@ -74,13 +74,13 @@ class ThreadsHandler {
       const getThreadUseCase = this._container.getInstance(
         GetThreadUseCase.name
       );
-      const threadRepository = this._container.getInstance(
-        ThreadRepository.name
+      const commentRepository = this._container.getInstance(
+        CommentRepository.name
       );
       const replyRepository = this._container.getInstance(ReplyRepository.name);
       const thread = await getThreadUseCase.execute(request.params.threadId);
       // ambil semua komentar pada thread
-      const commentsRaw = await threadRepository.getCommentsByThreadId(
+      const commentsRaw = await commentRepository.getCommentsByThreadId(
         request.params.threadId
       );
       // mapping sesuai kriteria + ambil replies per komentar
