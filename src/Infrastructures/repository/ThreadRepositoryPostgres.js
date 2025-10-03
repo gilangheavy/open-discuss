@@ -1,7 +1,7 @@
 const ThreadRepository = require("../../Domains/threads/ThreadRepository");
 const AddedThread = require("../../Domains/threads/entities/AddedThread");
 const Thread = require("../../Domains/threads/entities/Thread");
-const AddedComment = require("../../Domains/threads/entities/AddedComment");
+const AddedComment = require("../../Domains/comments/entities/AddedComment");
 const NotFoundError = require("../../Commons/exceptions/NotFoundError");
 const AuthorizationError = require("../../Commons/exceptions/AuthorizationError");
 

@@ -1,5 +1,5 @@
-const AddComment = require("../../../Domains/threads/entities/AddComment");
-const AddedComment = require("../../../Domains/threads/entities/AddedComment");
+const AddComment = require("../../../Domains/comments/entities/AddComment");
+const AddedComment = require("../../../Domains/comments/entities/AddedComment");
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
 const AddCommentUseCase = require("../AddCommentUseCase");
 
