@@ -1,7 +1,8 @@
 const AddThread = require("../../../Domains/threads/entities/AddThread");
 const AddedThread = require("../../../Domains/threads/entities/AddedThread");
 const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
-const AddThreadUseCase = require("../AddThreadUseCase");
+const Thread = require("../../../Domains/threads/entities/Thread");
+const ThreadUseCase = require("../ThreadUseCase");
 
 describe("AddThreadUseCase", () => {
   it("should orchestrating the add thread action correctly", async () => {
@@ -25,12 +26,12 @@ describe("AddThreadUseCase", () => {
       .fn()
       .mockImplementation(() => Promise.resolve(mockAddedThread));
 
-    const addThreadUseCase = new AddThreadUseCase({
+    const threadUseCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
     });
 
     // Action
-    const addedThread = await addThreadUseCase.execute(useCasePayload, owner);
+    const addedThread = await threadUseCase.addThread(useCasePayload, owner);
 
     // Assert
     expect(addedThread).toStrictEqual(
@@ -44,5 +45,37 @@ describe("AddThreadUseCase", () => {
       new AddThread(useCasePayload),
       owner
     );
+  });
+});
+
+describe("GetThreadUseCase", () => {
+  it("should orchestrating the get thread action correctly", async () => {
+    // Arrange
+    const threadId = "thread-123";
+    const mockThread = new Thread({
+      id: "thread-123",
+      title: "title",
+      body: "body",
+      date: new Date(),
+      username: "dicoding",
+      comments: [],
+    });
+
+    const mockThreadRepository = new ThreadRepository();
+
+    mockThreadRepository.getThreadById = jest
+      .fn()
+      .mockImplementation(() => Promise.resolve(mockThread));
+
+    const threadUseCase = new ThreadUseCase({
+      threadRepository: mockThreadRepository,
+    });
+
+    // Action
+    const thread = await threadUseCase.getThread(threadId);
+
+    // Assert
+    expect(thread).toStrictEqual(mockThread);
+    expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
   });
 });

@@ -1,9 +1,6 @@
-const AddReplyUseCase = require("../../../../Applications/use_case/AddReplyUseCase");
-const DeleteReplyUseCase = require("../../../../Applications/use_case/DeleteReplyUseCase");
-const AddThreadUseCase = require("../../../../Applications/use_case/AddThreadUseCase");
-const GetThreadUseCase = require("../../../../Applications/use_case/GetThreadUseCase");
-const AddCommentUseCase = require("../../../../Applications/use_case/AddCommentUseCase");
-const DeleteCommentUseCase = require("../../../../Applications/use_case/DeleteCommentUseCase");
+const ReplyUseCase = require("../../../../Applications/use_case/ReplyUseCase");
+const ThreadUseCase = require("../../../../Applications/use_case/ThreadUseCase");
+const CommentUseCase = require("../../../../Applications/use_case/CommentUseCase");
 const CommentRepository = require("../../../../Domains/comments/CommentRepository");
 const ReplyRepository = require("../../../../Domains/replies/ReplyRepository");
 
@@ -21,8 +18,8 @@ class ThreadsHandler {
   async postReplyHandler(request, h) {
     const { id: owner } = request.auth.credentials;
     const { threadId, commentId } = request.params;
-    const addReplyUseCase = this._container.getInstance(AddReplyUseCase.name);
-    const addedReply = await addReplyUseCase.execute(
+    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
+    const addedReply = await replyUseCase.addReply(
       request.payload,
       threadId,
       commentId,
@@ -42,10 +39,8 @@ class ThreadsHandler {
   async deleteReplyHandler(request, h) {
     const { id: owner } = request.auth.credentials;
     const { threadId, commentId, replyId } = request.params;
-    const deleteReplyUseCase = this._container.getInstance(
-      DeleteReplyUseCase.name
-    );
-    await deleteReplyUseCase.execute(threadId, commentId, replyId, owner);
+    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
+    await replyUseCase.deleteReply(threadId, commentId, replyId, owner);
 
     const response = h.response({
       status: "success",
@@ -56,8 +51,8 @@ class ThreadsHandler {
 
   async postThreadHandler(request, h) {
     const { id: userId } = request.auth.credentials;
-    const addThreadUseCase = this._container.getInstance(AddThreadUseCase.name);
-    const addedThread = await addThreadUseCase.execute(request.payload, userId);
+    const threadUseCase = this._container.getInstance(ThreadUseCase.name);
+    const addedThread = await threadUseCase.addThread(request.payload, userId);
 
     const response = h.response({
       status: "success",
@@ -71,14 +66,12 @@ class ThreadsHandler {
 
   async getThreadByIdHandler(request, h) {
     try {
-      const getThreadUseCase = this._container.getInstance(
-        GetThreadUseCase.name
-      );
+      const threadUseCase = this._container.getInstance(ThreadUseCase.name);
       const commentRepository = this._container.getInstance(
         CommentRepository.name
       );
       const replyRepository = this._container.getInstance(ReplyRepository.name);
-      const thread = await getThreadUseCase.execute(request.params.threadId);
+      const thread = await threadUseCase.getThread(request.params.threadId);
       // ambil semua komentar pada thread
       const commentsRaw = await commentRepository.getCommentsByThreadId(
         request.params.threadId
@@ -149,10 +142,8 @@ class ThreadsHandler {
   async postCommentHandler(request, h) {
     const { id: owner } = request.auth.credentials;
     const { threadId } = request.params;
-    const addCommentUseCase = this._container.getInstance(
-      AddCommentUseCase.name
-    );
-    const addedComment = await addCommentUseCase.execute(
+    const commentUseCase = this._container.getInstance(CommentUseCase.name);
+    const addedComment = await commentUseCase.addComment(
       request.payload,
       threadId,
       owner
@@ -171,10 +162,8 @@ class ThreadsHandler {
   async deleteCommentHandler(request, h) {
     const { id: owner } = request.auth.credentials;
     const { threadId, commentId } = request.params;
-    const deleteCommentUseCase = this._container.getInstance(
-      DeleteCommentUseCase.name
-    );
-    await deleteCommentUseCase.execute(threadId, commentId, owner);
+    const commentUseCase = this._container.getInstance(CommentUseCase.name);
+    await commentUseCase.deleteComment(threadId, commentId, owner);
 
     const response = h.response({
       status: "success",
