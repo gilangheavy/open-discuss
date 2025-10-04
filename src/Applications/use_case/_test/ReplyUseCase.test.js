@@ -1,28 +1,33 @@
-const ReplyUseCase = require("../ReplyUseCase");
 const AddReply = require("../../../Domains/replies/entities/AddReply");
+const CommentRepository = require("../../../Domains/comments/CommentRepository");
+const ReplyRepository = require("../../../Domains/replies/ReplyRepository");
+const ThreadRepository = require("../../../Domains/threads/ThreadRepository");
+const ReplyUseCase = require("../ReplyUseCase");
 
 describe("ReplyUseCase", () => {
-  let threadRepository;
-  let commentRepository;
-  let replyRepository;
+  let mockThreadRepository;
+  let mockCommentRepository;
+  let mockReplyRepository;
   let replyUseCase;
 
   beforeEach(() => {
-    threadRepository = {
-      verifyThreadAvailability: jest.fn(),
-    };
-    commentRepository = {
-      verifyCommentAvailability: jest.fn(),
-    };
-    replyRepository = {
-      addReply: jest.fn(),
-      verifyReplyOwner: jest.fn(),
-      deleteReply: jest.fn(),
-    };
+    mockThreadRepository = new ThreadRepository();
+    mockCommentRepository = new CommentRepository();
+    mockReplyRepository = new ReplyRepository();
+    // Mocking the methods of the repositories
+    mockThreadRepository.verifyThreadAvailability = jest.fn(() =>
+      Promise.resolve()
+    );
+    mockCommentRepository.verifyCommentAvailability = jest.fn(() =>
+      Promise.resolve()
+    );
+    mockReplyRepository.addReply = jest.fn(() => Promise.resolve({}));
+    mockReplyRepository.verifyReplyOwner = jest.fn(() => Promise.resolve());
+    mockReplyRepository.deleteReply = jest.fn(() => Promise.resolve());
     replyUseCase = new ReplyUseCase({
-      threadRepository,
-      commentRepository,
-      replyRepository,
+      threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
   });
 
@@ -38,9 +43,9 @@ describe("ReplyUseCase", () => {
         content: "reply content",
         owner,
       };
-      threadRepository.verifyThreadAvailability.mockResolvedValue();
-      commentRepository.verifyCommentAvailability.mockResolvedValue();
-      replyRepository.addReply.mockResolvedValue(expectedAddedReply);
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
+      mockReplyRepository.addReply.mockResolvedValue(expectedAddedReply);
 
       // Act
       const result = await replyUseCase.addReply(
@@ -51,13 +56,13 @@ describe("ReplyUseCase", () => {
       );
 
       // Assert
-      expect(threadRepository.verifyThreadAvailability).toBeCalledWith(
+      expect(mockThreadRepository.verifyThreadAvailability).toBeCalledWith(
         threadId
       );
-      expect(commentRepository.verifyCommentAvailability).toBeCalledWith(
+      expect(mockCommentRepository.verifyCommentAvailability).toBeCalledWith(
         commentId
       );
-      expect(replyRepository.addReply).toBeCalledWith(expect.any(AddReply));
+      expect(mockReplyRepository.addReply).toBeCalledWith(expect.any(AddReply));
       expect(result).toEqual(expectedAddedReply);
     });
   });
@@ -69,27 +74,30 @@ describe("ReplyUseCase", () => {
       const commentId = "comment-123";
       const replyId = "reply-123";
       const owner = "user-123";
-      threadRepository.verifyThreadAvailability.mockResolvedValue();
-      commentRepository.verifyCommentAvailability.mockResolvedValue();
-      replyRepository.verifyReplyOwner.mockResolvedValue();
-      replyRepository.deleteReply.mockResolvedValue();
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
+      mockReplyRepository.verifyReplyOwner.mockResolvedValue();
+      mockReplyRepository.deleteReply.mockResolvedValue();
 
       // Act
       await replyUseCase.deleteReply(threadId, commentId, replyId, owner);
 
       // Assert
-      expect(threadRepository.verifyThreadAvailability).toBeCalledWith(
+      expect(mockThreadRepository.verifyThreadAvailability).toBeCalledWith(
         threadId
       );
-      expect(commentRepository.verifyCommentAvailability).toBeCalledWith(
+      expect(mockCommentRepository.verifyCommentAvailability).toBeCalledWith(
         commentId
       );
-      expect(replyRepository.verifyReplyOwner).toBeCalledWith(replyId, owner);
-      expect(replyRepository.deleteReply).toBeCalledWith(replyId);
+      expect(mockReplyRepository.verifyReplyOwner).toBeCalledWith(
+        replyId,
+        owner
+      );
+      expect(mockReplyRepository.deleteReply).toBeCalledWith(replyId);
     });
 
     it("should throw error if thread is not available", async () => {
-      threadRepository.verifyThreadAvailability.mockRejectedValue(
+      mockThreadRepository.verifyThreadAvailability.mockRejectedValue(
         new Error("Thread not found")
       );
       await expect(
@@ -103,8 +111,8 @@ describe("ReplyUseCase", () => {
     });
 
     it("should throw error if comment is not available", async () => {
-      threadRepository.verifyThreadAvailability.mockResolvedValue();
-      commentRepository.verifyCommentAvailability.mockRejectedValue(
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
+      mockCommentRepository.verifyCommentAvailability.mockRejectedValue(
         new Error("Comment not found")
       );
       await expect(
@@ -118,9 +126,9 @@ describe("ReplyUseCase", () => {
     });
 
     it("should throw error if reply owner verification fails", async () => {
-      threadRepository.verifyThreadAvailability.mockResolvedValue();
-      commentRepository.verifyCommentAvailability.mockResolvedValue();
-      replyRepository.verifyReplyOwner.mockRejectedValue(
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
+      mockReplyRepository.verifyReplyOwner.mockRejectedValue(
         new Error("Unauthorized")
       );
       await expect(
