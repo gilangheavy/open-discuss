@@ -8,7 +8,6 @@ const CommentsTableTestHelper = require("../../../../tests/CommentsTableTestHelp
 
 describe("ReplyRepositoryPostgres integration", () => {
   afterEach(async () => {
-    // Membersihkan semua tabel terkait agar state antar test tidak bocor
     await RepliesTableTestHelper.cleanTable();
     await CommentsTableTestHelper.cleanTable();
     await ThreadsTableTestHelper.cleanTable();
@@ -20,7 +19,7 @@ describe("ReplyRepositoryPostgres integration", () => {
   });
 
   it("should add reply and verify in database", async () => {
-    // Arrange: Setup user, thread, comment sebagai dependensi FK
+    // Arrange
     await UsersTableTestHelper.addUser({ id: "user-123" });
     await ThreadsTableTestHelper.addThread({
       id: "thread-123",
