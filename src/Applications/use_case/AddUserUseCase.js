@@ -1,4 +1,5 @@
-const RegisterUser = require('../../Domains/users/entities/RegisterUser');
+const RegisterUser = require("../../Domains/users/entities/RegisterUser");
+const InvariantError = require("../../Commons/exceptions/InvariantError");
 
 class AddUserUseCase {
   constructor({ userRepository, passwordHash }) {
@@ -8,8 +9,16 @@ class AddUserUseCase {
 
   async execute(useCasePayload) {
     const registerUser = new RegisterUser(useCasePayload);
-    await this._userRepository.verifyAvailableUsername(registerUser.username);
-    registerUser.password = await this._passwordHash.hash(registerUser.password);
+    // Repository returns raw count; enforce business rule here
+    const usernameCount = await this._userRepository.verifyAvailableUsername(
+      registerUser.username
+    );
+    if (usernameCount > 0) {
+      throw new InvariantError("username tidak tersedia");
+    }
+    registerUser.password = await this._passwordHash.hash(
+      registerUser.password
+    );
     return this._userRepository.addUser(registerUser);
   }
 }

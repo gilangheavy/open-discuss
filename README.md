@@ -109,3 +109,79 @@ Import `Forum API V1 Test.postman_collection.json` to run end-to-end requests. S
 
 - 500 on POST /threads or other endpoints: ensure DB migrations have been applied (`npm run migrate`) and your JWT keys match those used to sign tokens.
 - Unauthorized (401): include `Authorization: Bearer <accessToken>` header for protected endpoints.
+
+## Architecture and conventions
+
+This project follows a clean layering approach:
+
+- Domains: entities, abstract repositories, and domain errors
+- Applications: use cases (application services) implementing business rules
+- Infrastructures: concrete adapters (Postgres repositories, security, HTTP server)
+- Interfaces: HTTP handlers and routes
+
+Important decision: avoid business logic in repository layer (hindari penggunaan logic pada layer repository). Repositories should only perform database operations and return raw data, while use cases enforce rules and throw domain errors.
+
+### Repository contracts (cheat sheet)
+
+- AuthenticationRepositoryPostgres
+  - checkAvailabilityToken(token) -> number (0 if not found, >0 if exists)
+- UserRepositoryPostgres
+  - verifyAvailableUsername(username) -> number
+  - getPasswordByUsername(username) -> string | undefined
+  - getIdByUsername(username) -> string | undefined
+- ThreadRepositoryPostgres
+  - verifyThreadAvailability(threadId) -> number
+  - getThreadById(threadId) -> Thread | undefined
+- CommentRepositoryPostgres
+  - addComment(addComment) -> AddedComment
+  - verifyCommentAvailability(commentId) -> number
+  - verifyCommentOwner(commentId, owner) -> row | undefined (owner parameter is ignored here; use case checks authorization)
+  - deleteComment(commentId) -> void (soft-delete)
+- ReplyRepositoryPostgres
+  - addReply(addReply) -> AddedReply
+  - verifyReplyOwner(replyId, owner) -> row | undefined (owner parameter is ignored here; use case checks authorization)
+  - deleteReply(replyId) -> void (soft-delete)
+
+### Use case responsibilities
+
+Use cases consume repository outputs and enforce business rules, throwing domain errors with localized messages when needed:
+
+- NotFoundError: e.g., "thread tidak ditemukan", "komentar tidak ditemukan", "balasan tidak ditemukan"
+- AuthorizationError: "anda tidak berhak mengakses resource ini"
+- InvariantError: e.g., "username tidak tersedia", "refresh token tidak ditemukan di database"
+
+### HTTP error mapping
+
+HTTP handlers call use cases; errors bubble to centralized mapping to status codes:
+
+- InvariantError -> 400 Bad Request
+- AuthenticationError -> 401 Unauthorized
+- AuthorizationError -> 403 Forbidden
+- NotFoundError -> 404 Not Found
+
+### Testing guidelines
+
+- Repository integration tests should assert returned counts/rows, not exceptions
+- Use case unit tests should mock repositories to return numbers/rows and assert that use cases throw the correct domain errors or return expected entities
+- HTTP tests assert status codes/messages produced by domain errors
+
+### Replies table and migrations
+
+The `replies` table is used by tests and runtime. Migrations create it; tests also defensively ensure the table exists. Run `npm run migrate` (or `npm run migrate:test`) before starting or testing.
+
+### Quick start (development)
+
+```
+# Install deps
+npm install
+
+# Setup databases (ensure .env is filled)
+npm run migrate
+npm run migrate:test
+
+# Run tests
+npm test
+
+# Start dev server
+npm run start:dev
+```

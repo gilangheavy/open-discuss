@@ -1,7 +1,7 @@
 const ThreadRepository = require("../../Domains/threads/ThreadRepository");
 const AddedThread = require("../../Domains/threads/entities/AddedThread");
 const Thread = require("../../Domains/threads/entities/Thread");
-const NotFoundError = require("../../Commons/exceptions/NotFoundError");
+// Repository should not throw domain errors; return raw data/count only
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -31,10 +31,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError("thread tidak ditemukan");
-    }
+    return result.rowCount;
   }
 
   async getThreadById(threadId) {
@@ -44,12 +41,11 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError("thread tidak ditemukan");
-    }
-
     const thread = result.rows[0];
+    if (!thread) {
+      // Return undefined; use case will handle NotFoundError
+      return undefined;
+    }
 
     // ensure date is a Date object for Thread entity validation
     const threadDate =

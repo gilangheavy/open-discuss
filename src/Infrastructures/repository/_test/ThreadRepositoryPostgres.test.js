@@ -6,7 +6,7 @@ const AddedThread = require("../../../Domains/threads/entities/AddedThread");
 const Thread = require("../../../Domains/threads/entities/Thread");
 const pool = require("../../database/postgres/pool");
 const ThreadRepositoryPostgres = require("../ThreadRepositoryPostgres");
-const NotFoundError = require("../../../Commons/exceptions/NotFoundError");
+// Repositories no longer throw domain errors
 
 describe("ThreadRepositoryPostgres", () => {
   afterEach(async () => {
@@ -57,18 +57,15 @@ describe("ThreadRepositoryPostgres", () => {
   });
 
   describe("verifyThreadAvailability function", () => {
-    it("should throw NotFoundError if thread not available", async () => {
-      // Arrange
+    it("should return 0 if thread not available", async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(
-        threadRepositoryPostgres.verifyThreadAvailability("thread-123")
-      ).rejects.toThrowError(NotFoundError);
+      const count = await threadRepositoryPostgres.verifyThreadAvailability(
+        "thread-123"
+      );
+      expect(count).toBe(0);
     });
 
-    it("should not throw NotFoundError if thread available", async () => {
-      // Arrange
+    it("should return > 0 if thread available", async () => {
       await UsersTableTestHelper.addUser({
         id: "user-123",
         username: "dicoding",
@@ -78,23 +75,18 @@ describe("ThreadRepositoryPostgres", () => {
         owner: "user-123",
       });
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(
-        threadRepositoryPostgres.verifyThreadAvailability("thread-123")
-      ).resolves.not.toThrowError(NotFoundError);
+      const count = await threadRepositoryPostgres.verifyThreadAvailability(
+        "thread-123"
+      );
+      expect(count).toBeGreaterThan(0);
     });
   });
 
   describe("getThreadById function", () => {
-    it("should throw NotFoundError if thread not found", async () => {
-      // Arrange
+    it("should return undefined if thread not found", async () => {
       const threadRepositoryPostgres = new ThreadRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(
-        threadRepositoryPostgres.getThreadById("thread-123")
-      ).rejects.toThrowError(NotFoundError);
+      const thread = await threadRepositoryPostgres.getThreadById("thread-123");
+      expect(thread).toBeUndefined();
     });
 
     it("should return thread correctly", async () => {

@@ -1,7 +1,6 @@
 const ReplyRepository = require("../../Domains/replies/ReplyRepository");
 const AddedReply = require("../../Domains/replies/entities/AddedReply");
-const NotFoundError = require("../../Commons/exceptions/NotFoundError");
-const AuthorizationError = require("../../Commons/exceptions/AuthorizationError");
+// Repository should not throw domain errors; return data/count and let use case decide
 
 class ReplyRepositoryPostgres extends ReplyRepository {
   constructor(pool, idGenerator) {
@@ -25,22 +24,14 @@ class ReplyRepositoryPostgres extends ReplyRepository {
     return new AddedReply({ ...result.rows[0] });
   }
 
-  async verifyReplyOwner(replyId, owner) {
+  async verifyReplyOwner(replyId) {
     const query = {
       text: "SELECT * FROM replies WHERE id = $1",
       values: [replyId],
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError("balasan tidak ditemukan");
-    }
-
-    const reply = result.rows[0];
-    if (reply.owner !== owner) {
-      throw new AuthorizationError("anda tidak berhak mengakses resource ini");
-    }
+    return result.rows[0];
   }
 
   async deleteReply(replyId) {

@@ -11,7 +11,12 @@ class ThreadUseCase {
   }
 
   async getThread(threadId) {
-    return this._threadRepository.getThreadById(threadId);
+    const thread = await this._threadRepository.getThreadById(threadId);
+    if (!thread) {
+      const NotFoundError = require("../../Commons/exceptions/NotFoundError");
+      throw new NotFoundError("thread tidak ditemukan");
+    }
+    return thread;
   }
 }
 

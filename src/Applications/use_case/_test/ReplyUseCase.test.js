@@ -17,13 +17,15 @@ describe("ReplyUseCase", () => {
     mockReplyRepository = new ReplyRepository();
     // Mocking the methods of the repositories
     mockThreadRepository.verifyThreadAvailability = jest.fn(() =>
-      Promise.resolve()
+      Promise.resolve(1)
     );
     mockCommentRepository.verifyCommentAvailability = jest.fn(() =>
-      Promise.resolve()
+      Promise.resolve(1)
     );
     mockReplyRepository.addReply = jest.fn(() => Promise.resolve({}));
-    mockReplyRepository.verifyReplyOwner = jest.fn(() => Promise.resolve());
+    mockReplyRepository.verifyReplyOwner = jest.fn(() =>
+      Promise.resolve({ id: "reply-123", owner: "user-123" })
+    );
     mockReplyRepository.deleteReply = jest.fn(() => Promise.resolve());
     replyUseCase = new ReplyUseCase({
       threadRepository: mockThreadRepository,
@@ -46,8 +48,8 @@ describe("ReplyUseCase", () => {
         owner,
       });
 
-      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
-      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue(1);
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue(1);
       mockReplyRepository.addReply.mockResolvedValue(mockAddedReply);
 
       // Act
@@ -91,9 +93,12 @@ describe("ReplyUseCase", () => {
       const commentId = "comment-123";
       const replyId = "reply-123";
       const owner = "user-123";
-      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
-      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
-      mockReplyRepository.verifyReplyOwner.mockResolvedValue();
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue(1);
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue(1);
+      mockReplyRepository.verifyReplyOwner.mockResolvedValue({
+        id: replyId,
+        owner,
+      });
       mockReplyRepository.deleteReply.mockResolvedValue();
 
       // Act
@@ -114,9 +119,7 @@ describe("ReplyUseCase", () => {
     });
 
     it("should throw error if thread is not available", async () => {
-      mockThreadRepository.verifyThreadAvailability.mockRejectedValue(
-        new Error("Thread not found")
-      );
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue(0);
       await expect(
         replyUseCase.deleteReply(
           "thread-404",
@@ -124,14 +127,12 @@ describe("ReplyUseCase", () => {
           "reply-123",
           "user-123"
         )
-      ).rejects.toThrow("Thread not found");
+      ).rejects.toThrow("thread tidak ditemukan");
     });
 
     it("should throw error if comment is not available", async () => {
-      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
-      mockCommentRepository.verifyCommentAvailability.mockRejectedValue(
-        new Error("Comment not found")
-      );
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue(1);
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue(0);
       await expect(
         replyUseCase.deleteReply(
           "thread-123",
@@ -139,15 +140,16 @@ describe("ReplyUseCase", () => {
           "reply-123",
           "user-123"
         )
-      ).rejects.toThrow("Comment not found");
+      ).rejects.toThrow("komentar tidak ditemukan");
     });
 
     it("should throw error if reply owner verification fails", async () => {
-      mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
-      mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
-      mockReplyRepository.verifyReplyOwner.mockRejectedValue(
-        new Error("Unauthorized")
-      );
+      mockThreadRepository.verifyThreadAvailability.mockResolvedValue(1);
+      mockCommentRepository.verifyCommentAvailability.mockResolvedValue(1);
+      mockReplyRepository.verifyReplyOwner.mockResolvedValue({
+        id: "reply-404",
+        owner: "another-user",
+      });
       await expect(
         replyUseCase.deleteReply(
           "thread-123",
@@ -155,7 +157,7 @@ describe("ReplyUseCase", () => {
           "reply-404",
           "user-123"
         )
-      ).rejects.toThrow("Unauthorized");
+      ).rejects.toThrow("anda tidak berhak mengakses resource ini");
     });
   });
 });

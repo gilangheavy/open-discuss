@@ -5,7 +5,6 @@ const AddComment = require("../../../Domains/comments/entities/AddComment");
 const AddedComment = require("../../../Domains/comments/entities/AddedComment");
 const pool = require("../../database/postgres/pool");
 const CommentRepositoryPostgres = require("../CommentRepositoryPostgres");
-const AuthorizationError = require("../../../Commons/exceptions/AuthorizationError");
 
 describe("CommentRepositoryPostgres", () => {
   afterEach(async () => {
@@ -58,8 +57,7 @@ describe("CommentRepositoryPostgres", () => {
   });
 
   describe("verifyCommentOwner function", () => {
-    it("should throw AuthorizationError when comment owner is not the same as given owner", async () => {
-      // Arrange
+    it("should return the comment row regardless of owner match; use case handles authorization", async () => {
       const userId = "user-123";
       const threadId = "thread-123";
       const commentId = "comment-123";
@@ -70,32 +68,13 @@ describe("CommentRepositoryPostgres", () => {
         owner: userId,
       });
 
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(
-        commentRepositoryPostgres.verifyCommentOwner(commentId, "user-456")
-      ).rejects.toThrowError(AuthorizationError);
-    });
-
-    it("should not throw AuthorizationError when comment owner is the same as given owner", async () => {
-      // Arrange
-      const userId = "user-123";
-      const threadId = "thread-123";
-      const commentId = "comment-123";
-      await UsersTableTestHelper.addUser({ id: userId });
-      await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
-      await CommentsTableTestHelper.addComment({
-        id: commentId,
-        owner: userId,
-      });
-
-      const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
-
-      // Action & Assert
-      await expect(
-        commentRepositoryPostgres.verifyCommentOwner(commentId, userId)
-      ).resolves.not.toThrowError(AuthorizationError);
+      const repo = new CommentRepositoryPostgres(pool, {});
+      const row1 = await repo.verifyCommentOwner(commentId, "user-456");
+      const row2 = await repo.verifyCommentOwner(commentId, userId);
+      expect(row1).toBeDefined();
+      expect(row1.id).toBe(commentId);
+      expect(row2).toBeDefined();
+      expect(row2.id).toBe(commentId);
     });
   });
 

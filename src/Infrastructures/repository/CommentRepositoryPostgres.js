@@ -1,7 +1,6 @@
 const CommentRepository = require("../../Domains/comments/CommentRepository");
 const AddedComment = require("../../Domains/comments/entities/AddedComment");
-const NotFoundError = require("../../Commons/exceptions/NotFoundError");
-const AuthorizationError = require("../../Commons/exceptions/AuthorizationError");
+// Repository should not implement business logic or throw domain errors
 
 class CommentRepositoryPostgres extends CommentRepository {
   constructor(pool, idGenerator) {
@@ -25,22 +24,14 @@ class CommentRepositoryPostgres extends CommentRepository {
     return new AddedComment({ ...result.rows[0] });
   }
 
-  async verifyCommentOwner(commentId, owner) {
+  async verifyCommentOwner(commentId) {
     const query = {
       text: "SELECT * FROM comments WHERE id = $1",
       values: [commentId],
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError("komentar tidak ditemukan");
-    }
-
-    const comment = result.rows[0];
-    if (comment.owner !== owner) {
-      throw new AuthorizationError("anda tidak berhak mengakses resource ini");
-    }
+    return result.rows[0];
   }
 
   async deleteComment(commentId) {
@@ -81,10 +72,7 @@ class CommentRepositoryPostgres extends CommentRepository {
     };
 
     const result = await this._pool.query(query);
-
-    if (!result.rowCount) {
-      throw new NotFoundError("komentar tidak ditemukan");
-    }
+    return result.rowCount;
   }
 }
 

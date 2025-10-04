@@ -1,5 +1,4 @@
-const InvariantError = require('../../Commons/exceptions/InvariantError');
-const AuthenticationRepository = require('../../Domains/authentications/AuthenticationRepository');
+const AuthenticationRepository = require("../../Domains/authentications/AuthenticationRepository");
 
 class AuthenticationRepositoryPostgres extends AuthenticationRepository {
   constructor(pool) {
@@ -9,7 +8,7 @@ class AuthenticationRepositoryPostgres extends AuthenticationRepository {
 
   async addToken(token) {
     const query = {
-      text: 'INSERT INTO authentications VALUES ($1)',
+      text: "INSERT INTO authentications VALUES ($1)",
       values: [token],
     };
 
@@ -18,20 +17,18 @@ class AuthenticationRepositoryPostgres extends AuthenticationRepository {
 
   async checkAvailabilityToken(token) {
     const query = {
-      text: 'SELECT * FROM authentications WHERE token = $1',
+      text: "SELECT * FROM authentications WHERE token = $1",
       values: [token],
     };
 
     const result = await this._pool.query(query);
-
-    if (result.rows.length === 0) {
-      throw new InvariantError('refresh token tidak ditemukan di database');
-    }
+    // Repository should not implement business logic; return raw count
+    return result.rows.length;
   }
 
   async deleteToken(token) {
     const query = {
-      text: 'DELETE FROM authentications WHERE token = $1',
+      text: "DELETE FROM authentications WHERE token = $1",
       values: [token],
     };
 
