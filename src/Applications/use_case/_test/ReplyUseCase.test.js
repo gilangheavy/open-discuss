@@ -1,3 +1,4 @@
+const AddedReply = require("../../../Domains/replies/entities/AddedReply");
 const AddReply = require("../../../Domains/replies/entities/AddReply");
 const CommentRepository = require("../../../Domains/comments/CommentRepository");
 const ReplyRepository = require("../../../Domains/replies/ReplyRepository");
@@ -38,17 +39,19 @@ describe("ReplyUseCase", () => {
       const threadId = "thread-123";
       const commentId = "comment-123";
       const owner = "user-123";
-      const expectedAddedReply = {
+
+      const mockAddedReply = new AddedReply({
         id: "reply-123",
-        content: "reply content",
+        content: useCasePayload.content,
         owner,
-      };
+      });
+
       mockThreadRepository.verifyThreadAvailability.mockResolvedValue();
       mockCommentRepository.verifyCommentAvailability.mockResolvedValue();
-      mockReplyRepository.addReply.mockResolvedValue(expectedAddedReply);
+      mockReplyRepository.addReply.mockResolvedValue(mockAddedReply);
 
       // Act
-      const result = await replyUseCase.addReply(
+      const addedReply = await replyUseCase.addReply(
         useCasePayload,
         threadId,
         commentId,
@@ -62,8 +65,22 @@ describe("ReplyUseCase", () => {
       expect(mockCommentRepository.verifyCommentAvailability).toBeCalledWith(
         commentId
       );
-      expect(mockReplyRepository.addReply).toBeCalledWith(expect.any(AddReply));
-      expect(result).toEqual(expectedAddedReply);
+      expect(mockReplyRepository.addReply).toBeCalledWith(
+        new AddReply({
+          content: useCasePayload.content,
+          threadId,
+          commentId,
+          owner,
+        })
+      );
+
+      expect(addedReply).toStrictEqual(
+        new AddedReply({
+          id: "reply-123",
+          content: useCasePayload.content,
+          owner,
+        })
+      );
     });
   });
 
