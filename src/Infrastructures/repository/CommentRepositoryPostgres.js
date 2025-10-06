@@ -46,9 +46,7 @@ class CommentRepositoryPostgres extends CommentRepository {
   async getCommentsByThreadId(threadId) {
     const query = {
       text:
-        "SELECT comments.id, users.username, " +
-        "to_char(comments.date AT TIME ZONE 'UTC', 'YYYY-MM-DD\"T\"HH24:MI:SS.MS\"Z\"') as date_text, " +
-        "comments.content, comments.is_delete " +
+        "SELECT comments.id, users.username, comments.date, comments.content, comments.is_delete " +
         "FROM comments LEFT JOIN users ON comments.owner = users.id " +
         "WHERE comments.thread_id = $1 ORDER BY comments.date ASC",
       values: [threadId],
@@ -57,11 +55,8 @@ class CommentRepositoryPostgres extends CommentRepository {
     const result = await this._pool.query(query);
 
     return result.rows.map((row) => ({
-      id: row.id,
-      username: row.username,
-      date: row.date_text,
-      content: row.content,
-      is_delete: row.is_delete,
+      ...row,
+      date: new Date(row.date).toISOString(),
     }));
   }
 
