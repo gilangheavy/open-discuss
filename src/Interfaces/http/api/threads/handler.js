@@ -15,40 +15,6 @@ class ThreadsHandler {
     this.deleteReplyHandler = this.deleteReplyHandler.bind(this);
   }
 
-  async postReplyHandler(request, h) {
-    const { id: owner } = request.auth.credentials;
-    const { threadId, commentId } = request.params;
-    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
-    const addedReply = await replyUseCase.addReply(
-      request.payload,
-      threadId,
-      commentId,
-      owner
-    );
-
-    const response = h.response({
-      status: "success",
-      data: {
-        addedReply,
-      },
-    });
-    response.code(201);
-    return response;
-  }
-
-  async deleteReplyHandler(request, h) {
-    const { id: owner } = request.auth.credentials;
-    const { threadId, commentId, replyId } = request.params;
-    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
-    await replyUseCase.deleteReply(threadId, commentId, replyId, owner);
-
-    const response = h.response({
-      status: "success",
-    });
-    response.code(200);
-    return response;
-  }
-
   async postThreadHandler(request, h) {
     const { id: userId } = request.auth.credentials;
     const threadUseCase = this._container.getInstance(ThreadUseCase.name);
@@ -72,11 +38,9 @@ class ThreadsHandler {
       );
       const replyRepository = this._container.getInstance(ReplyRepository.name);
       const thread = await threadUseCase.getThread(request.params.threadId);
-      // ambil semua komentar pada thread
       const commentsRaw = await commentRepository.getCommentsByThreadId(
         request.params.threadId
       );
-      // mapping sesuai kriteria + ambil replies per komentar
       const comments = await Promise.all(
         commentsRaw.map(async (comment) => {
           const repliesRaw = await replyRepository.getRepliesByCommentId(
@@ -102,9 +66,7 @@ class ThreadsHandler {
           };
         })
       );
-      // urutkan ascending
       comments.sort((a, b) => new Date(a.date) - new Date(b.date));
-      // response sesuai kriteria
       const response = h.response({
         status: "success",
         data: {
@@ -132,8 +94,6 @@ class ThreadsHandler {
         response.code(404);
         return response;
       }
-      // log unexpected error for debugging
-      // eslint-disable-next-line no-console
       console.error("getThreadByIdHandler unexpected error:", error);
       throw error;
     }
@@ -164,6 +124,40 @@ class ThreadsHandler {
     const { threadId, commentId } = request.params;
     const commentUseCase = this._container.getInstance(CommentUseCase.name);
     await commentUseCase.deleteComment(threadId, commentId, owner);
+
+    const response = h.response({
+      status: "success",
+    });
+    response.code(200);
+    return response;
+  }
+
+  async postReplyHandler(request, h) {
+    const { id: owner } = request.auth.credentials;
+    const { threadId, commentId } = request.params;
+    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
+    const addedReply = await replyUseCase.addReply(
+      request.payload,
+      threadId,
+      commentId,
+      owner
+    );
+
+    const response = h.response({
+      status: "success",
+      data: {
+        addedReply,
+      },
+    });
+    response.code(201);
+    return response;
+  }
+
+  async deleteReplyHandler(request, h) {
+    const { id: owner } = request.auth.credentials;
+    const { threadId, commentId, replyId } = request.params;
+    const replyUseCase = this._container.getInstance(ReplyUseCase.name);
+    await replyUseCase.deleteReply(threadId, commentId, replyId, owner);
 
     const response = h.response({
       status: "success",

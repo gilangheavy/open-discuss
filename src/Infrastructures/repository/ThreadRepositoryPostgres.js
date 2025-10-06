@@ -1,7 +1,6 @@
 const ThreadRepository = require("../../Domains/threads/ThreadRepository");
 const AddedThread = require("../../Domains/threads/entities/AddedThread");
 const Thread = require("../../Domains/threads/entities/Thread");
-// Repository should not throw domain errors; return raw data/count only
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -43,18 +42,15 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const result = await this._pool.query(query);
     const thread = result.rows[0];
     if (!thread) {
-      // Return undefined; use case will handle NotFoundError
       return undefined;
     }
-
-    // ensure date is a Date object for Thread entity validation
     const threadDate =
       thread.date instanceof Date ? thread.date : new Date(thread.date);
 
     return new Thread({
       ...thread,
       date: threadDate,
-      comments: [], // Will be filled later by comment repository
+      comments: [],
     });
   }
 }

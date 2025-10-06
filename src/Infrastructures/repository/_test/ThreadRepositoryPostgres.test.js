@@ -116,5 +116,31 @@ describe("ThreadRepositoryPostgres", () => {
         })
       );
     });
+
+    it("should handle thread.date as Date instance", async () => {
+      // Arrange: mock pool to return thread with date as Date instance
+      const mockPool = {
+        query: jest.fn().mockResolvedValue({
+          rows: [
+            {
+              id: "thread-999",
+              title: "mock thread",
+              body: "mock body",
+              date: new Date("2023-01-01T00:00:00Z"),
+              username: "mockuser",
+            },
+          ],
+        }),
+      };
+      const threadRepositoryPostgres = new ThreadRepositoryPostgres(
+        mockPool,
+        {}
+      );
+      // Action
+      const thread = await threadRepositoryPostgres.getThreadById("thread-999");
+      // Assert
+      expect(thread.date).toBeInstanceOf(Date);
+      expect(thread.date.toISOString()).toBe("2023-01-01T00:00:00.000Z");
+    });
   });
 });
