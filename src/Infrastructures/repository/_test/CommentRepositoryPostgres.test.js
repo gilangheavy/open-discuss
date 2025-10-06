@@ -58,6 +58,7 @@ describe("CommentRepositoryPostgres", () => {
 
   describe("verifyCommentOwner function", () => {
     it("should return the comment row regardless of owner match; use case handles authorization", async () => {
+      // Arrange
       const userId = "user-123";
       const threadId = "thread-123";
       const commentId = "comment-123";
@@ -65,16 +66,26 @@ describe("CommentRepositoryPostgres", () => {
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
       await CommentsTableTestHelper.addComment({
         id: commentId,
+        thread_id: threadId,
+        content: "isi comment",
         owner: userId,
+        date: "2023-01-01T00:00:00.000Z",
       });
 
       const repo = new CommentRepositoryPostgres(pool, {});
-      const row1 = await repo.verifyCommentOwner(commentId, "user-456");
-      const row2 = await repo.verifyCommentOwner(commentId, userId);
-      expect(row1).toBeDefined();
-      expect(row1.id).toBe(commentId);
-      expect(row2).toBeDefined();
-      expect(row2.id).toBe(commentId);
+
+      // Action
+      const row = await repo.verifyCommentOwner(commentId, userId);
+
+      // Assert
+      expect(row).toMatchObject({
+        id: commentId,
+        thread_id: threadId,
+        content: "isi comment",
+        owner: userId,
+        is_delete: false,
+      });
+      expect(row.date instanceof Date ? row.date.toISOString() : row.date);
     });
   });
 
