@@ -11,6 +11,7 @@ class Comment {
     this.id = id;
     this.username = username;
     this.date = date;
+    this.isDelete = isDelete;
     this.content = isDelete ? '**komentar telah dihapus**' : content;
   }
 
@@ -20,7 +21,6 @@ class Comment {
     if (!id || !username || !date || !content) {
       throw new Error('COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
     }
-
     if (
       typeof id !== 'string'
       || typeof username !== 'string'

@@ -49,6 +49,7 @@ describe('Comment entities', () => {
     expect(comment.username).toEqual(payload.username);
     expect(comment.date).toEqual(payload.date);
     expect(comment.content).toEqual(payload.content);
+    expect(comment.isDelete).toEqual(payload.isDelete);
   });
 
   it('should create deleted Comment entities correctly', () => {
@@ -70,5 +71,23 @@ describe('Comment entities', () => {
     expect(comment.username).toEqual(payload.username);
     expect(comment.date).toEqual(payload.date);
     expect(comment.content).toEqual('**komentar telah dihapus**');
+  });
+
+  it('should default isDelete to false when not provided', () => {
+    // Arrange
+    const payload = {
+      id: 'comment-456',
+      username: 'dicoding',
+      date: new Date(),
+      content: 'komentar baru',
+      // isDelete sengaja tidak disertakan
+    };
+
+    // Action
+    const comment = new Comment(payload);
+
+    // Assert
+    expect(comment.isDelete).toBe(false);
+    expect(comment.content).toBe(payload.content);
   });
 });
