@@ -1,8 +1,9 @@
-const ReplyUseCase = require("../../../../Applications/use_case/ReplyUseCase");
-const ThreadUseCase = require("../../../../Applications/use_case/ThreadUseCase");
-const CommentUseCase = require("../../../../Applications/use_case/CommentUseCase");
-const CommentRepository = require("../../../../Domains/comments/CommentRepository");
-const ReplyRepository = require("../../../../Domains/replies/ReplyRepository");
+/* eslint-disable no-underscore-dangle */
+const ReplyUseCase = require('../../../../Applications/use_case/ReplyUseCase');
+const ThreadUseCase = require('../../../../Applications/use_case/ThreadUseCase');
+const CommentUseCase = require('../../../../Applications/use_case/CommentUseCase');
+const CommentRepository = require('../../../../Domains/comments/CommentRepository');
+const ReplyRepository = require('../../../../Domains/replies/ReplyRepository');
 
 class ThreadsHandler {
   constructor(container) {
@@ -21,7 +22,7 @@ class ThreadsHandler {
     const addedThread = await threadUseCase.addThread(request.payload, userId);
 
     const response = h.response({
-      status: "success",
+      status: 'success',
       data: {
         addedThread,
       },
@@ -34,22 +35,22 @@ class ThreadsHandler {
     try {
       const threadUseCase = this._container.getInstance(ThreadUseCase.name);
       const commentRepository = this._container.getInstance(
-        CommentRepository.name
+        CommentRepository.name,
       );
       const replyRepository = this._container.getInstance(ReplyRepository.name);
       const thread = await threadUseCase.getThread(request.params.threadId);
       const commentsRaw = await commentRepository.getCommentsByThreadId(
-        request.params.threadId
+        request.params.threadId,
       );
       const comments = await Promise.all(
         commentsRaw.map(async (comment) => {
           const repliesRaw = await replyRepository.getRepliesByCommentId(
-            comment.id
+            comment.id,
           );
           const replies = repliesRaw.map((reply) => ({
             id: reply.id,
             content: reply.is_delete
-              ? "**balasan telah dihapus**"
+              ? '**balasan telah dihapus**'
               : reply.content,
             date: reply.date,
             username: reply.username,
@@ -60,15 +61,15 @@ class ThreadsHandler {
             username: comment.username,
             date: comment.date,
             content: comment.is_delete
-              ? "**komentar telah dihapus**"
+              ? '**komentar telah dihapus**'
               : comment.content,
             replies,
           };
-        })
+        }),
       );
       comments.sort((a, b) => new Date(a.date) - new Date(b.date));
       const response = h.response({
-        status: "success",
+        status: 'success',
         data: {
           thread: {
             id: thread.id,
@@ -86,15 +87,14 @@ class ThreadsHandler {
       response.code(200);
       return response;
     } catch (error) {
-      if (error.name === "NotFoundError") {
+      if (error.name === 'NotFoundError') {
         const response = h.response({
-          status: "fail",
+          status: 'fail',
           message: error.message,
         });
         response.code(404);
         return response;
       }
-      console.error("getThreadByIdHandler unexpected error:", error);
       throw error;
     }
   }
@@ -106,11 +106,11 @@ class ThreadsHandler {
     const addedComment = await commentUseCase.addComment(
       request.payload,
       threadId,
-      owner
+      owner,
     );
 
     const response = h.response({
-      status: "success",
+      status: 'success',
       data: {
         addedComment,
       },
@@ -126,7 +126,7 @@ class ThreadsHandler {
     await commentUseCase.deleteComment(threadId, commentId, owner);
 
     const response = h.response({
-      status: "success",
+      status: 'success',
     });
     response.code(200);
     return response;
@@ -140,11 +140,11 @@ class ThreadsHandler {
       request.payload,
       threadId,
       commentId,
-      owner
+      owner,
     );
 
     const response = h.response({
-      status: "success",
+      status: 'success',
       data: {
         addedReply,
       },
@@ -160,7 +160,7 @@ class ThreadsHandler {
     await replyUseCase.deleteReply(threadId, commentId, replyId, owner);
 
     const response = h.response({
-      status: "success",
+      status: 'success',
     });
     response.code(200);
     return response;

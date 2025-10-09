@@ -1,47 +1,43 @@
-const Thread = require("../Thread");
+const Thread = require('../Thread');
 
-describe("Thread entities", () => {
-  it("should throw error when payload does not contain needed property", () => {
+describe('Thread entities', () => {
+  it('should throw error when payload does not contain needed property', () => {
     // Arrange
     const payload = {
-      id: "thread-123",
-      title: "title",
-      body: "body",
+      id: 'thread-123',
+      title: 'title',
+      body: 'body',
       date: new Date(),
-      username: "user-123",
+      username: 'user-123',
     };
 
     // Action & Assert
-    expect(() => new Thread(payload)).toThrowError(
-      "THREAD.NOT_CONTAIN_NEEDED_PROPERTY"
-    );
+    expect(() => new Thread(payload)).toThrowError('THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
   });
 
-  it("should throw error when payload not meet data type specification", () => {
+  it('should throw error when payload not meet data type specification', () => {
     // Arrange
     const payload = {
       id: 123,
-      title: "title",
-      body: "body",
+      title: 'title',
+      body: 'body',
       date: new Date(),
-      username: "user-123",
+      username: 'user-123',
       comments: [],
     };
 
     // Action & Assert
-    expect(() => new Thread(payload)).toThrowError(
-      "THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION"
-    );
+    expect(() => new Thread(payload)).toThrowError('THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
   });
 
-  it("should create Thread entities correctly", () => {
+  it('should create Thread entities correctly', () => {
     // Arrange
     const payload = {
-      id: "thread-123",
-      title: "title",
-      body: "body",
+      id: 'thread-123',
+      title: 'title',
+      body: 'body',
       date: new Date(),
-      username: "user-123",
+      username: 'user-123',
       comments: [],
     };
 

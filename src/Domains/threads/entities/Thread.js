@@ -1,8 +1,12 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-underscore-dangle */
 class Thread {
   constructor(payload) {
     this._verifyPayload(payload);
 
-    const { id, title, body, date, username, comments } = payload;
+    const {
+      id, title, body, date, username, comments,
+    } = payload;
 
     this.id = id;
     this.title = title;
@@ -12,20 +16,22 @@ class Thread {
     this.comments = comments;
   }
 
-  _verifyPayload({ id, title, body, date, username, comments }) {
+  _verifyPayload({
+    id, title, body, date, username, comments,
+  }) {
     if (!id || !title || !body || !date || !username || !comments) {
-      throw new Error("THREAD.NOT_CONTAIN_NEEDED_PROPERTY");
+      throw new Error('THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
 
     if (
-      typeof id !== "string" ||
-      typeof title !== "string" ||
-      typeof body !== "string" ||
-      !(date instanceof Date) ||
-      typeof username !== "string" ||
-      !Array.isArray(comments)
+      typeof id !== 'string'
+      || typeof title !== 'string'
+      || typeof body !== 'string'
+      || !(date instanceof Date)
+      || typeof username !== 'string'
+      || !Array.isArray(comments)
     ) {
-      throw new Error("THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION");
+      throw new Error('THREAD.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
 }

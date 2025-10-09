@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const LoginUserUseCase = require('../../../../Applications/use_case/LoginUserUseCase');
 const RefreshAuthenticationUseCase = require('../../../../Applications/use_case/RefreshAuthenticationUseCase');
 const LogoutUserUseCase = require('../../../../Applications/use_case/LogoutUserUseCase');

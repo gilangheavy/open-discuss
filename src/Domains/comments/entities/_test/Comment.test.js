@@ -1,42 +1,42 @@
-const Comment = require("../Comment");
+const Comment = require('../Comment');
 
-describe("Comment entities", () => {
-  it("should throw error when payload does not contain needed property", () => {
+describe('Comment entities', () => {
+  it('should throw error when payload does not contain needed property', () => {
     // Arrange
     const payload = {
-      id: "comment-123",
-      username: "dicoding",
+      id: 'comment-123',
+      username: 'dicoding',
       date: new Date(),
     };
 
     // Action & Assert
     expect(() => new Comment(payload)).toThrowError(
-      "COMMENT.NOT_CONTAIN_NEEDED_PROPERTY"
+      'COMMENT.NOT_CONTAIN_NEEDED_PROPERTY',
     );
   });
 
-  it("should throw error when payload not meet data type specification", () => {
+  it('should throw error when payload not meet data type specification', () => {
     // Arrange
     const payload = {
       id: 123,
-      username: "dicoding",
+      username: 'dicoding',
       date: new Date(),
-      content: "sebuah comment",
+      content: 'sebuah comment',
     };
 
     // Action & Assert
     expect(() => new Comment(payload)).toThrowError(
-      "COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION"
+      'COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION',
     );
   });
 
-  it("should create Comment entities correctly", () => {
+  it('should create Comment entities correctly', () => {
     // Arrange
     const payload = {
-      id: "comment-123",
-      username: "dicoding",
+      id: 'comment-123',
+      username: 'dicoding',
       date: new Date(),
-      content: "sebuah comment",
+      content: 'sebuah comment',
       isDelete: false,
     };
 
@@ -51,13 +51,13 @@ describe("Comment entities", () => {
     expect(comment.content).toEqual(payload.content);
   });
 
-  it("should create deleted Comment entities correctly", () => {
+  it('should create deleted Comment entities correctly', () => {
     // Arrange
     const payload = {
-      id: "comment-123",
-      username: "dicoding",
+      id: 'comment-123',
+      username: 'dicoding',
       date: new Date(),
-      content: "sebuah comment",
+      content: 'sebuah comment',
       isDelete: true,
     };
 
@@ -69,6 +69,6 @@ describe("Comment entities", () => {
     expect(comment.id).toEqual(payload.id);
     expect(comment.username).toEqual(payload.username);
     expect(comment.date).toEqual(payload.date);
-    expect(comment.content).toEqual("**komentar telah dihapus**");
+    expect(comment.content).toEqual('**komentar telah dihapus**');
   });
 });

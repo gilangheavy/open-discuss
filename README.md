@@ -4,8 +4,8 @@ Backend API built with Hapi, PostgreSQL, and JWT authentication. Includes users,
 
 ## Prerequisites
 
-- Node.js 14+ (LTS recommended)
-- PostgreSQL 12+
+- Node.js 22+ (LTS recommended)
+- PostgreSQL 17
 
 ## Environment variables
 
@@ -14,7 +14,7 @@ Create a `.env` file in the project root with at least the following variables (
 ```
 # Server
 HOST=localhost
-PORT=4000
+PORT=5000
 
 # JWT
 ACCESS_TOKEN_KEY=supersecretaccesstokenkey
@@ -70,15 +70,15 @@ npm run migrate:test
 npm run start:dev
 
 # Production-like
-npm start
+npm run start
 ```
 
-The API will listen on `http://HOST:PORT` (default `http://localhost:4000`).
+The API will listen on `http://HOST:PORT` (default `http://localhost:5000`).
 
 ## Run tests
 
 ```
-npm test
+npm run test
 ```
 
 Notes:
@@ -103,7 +103,7 @@ Deleted comments/replies are masked as `**komentar telah dihapus**` and `**balas
 
 ## Postman collection
 
-Import `Forum API V1 Test.postman_collection.json` to run end-to-end requests. Set the following variables in your Postman environment: `protocol` (http), `host` (localhost), `port` (4000), and data like `newUsername`, `newPassword`, etc. The collection includes tests for success and error paths.
+Import `Forum API V1 Test.postman_collection.json` to run end-to-end requests. Set the following variables in your Postman environment: `protocol` (http), `host` (localhost), `port` (5000), and data like `newUsername`, `newPassword`, etc. The collection includes tests for success and error paths.
 
 ## Troubleshooting
 

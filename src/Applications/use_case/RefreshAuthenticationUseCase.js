@@ -1,5 +1,10 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-underscore-dangle */
 class RefreshAuthenticationUseCase {
-  constructor({ authenticationRepository, authenticationTokenManager }) {
+  constructor({
+    authenticationRepository,
+    authenticationTokenManager,
+  }) {
     this._authenticationRepository = authenticationRepository;
     this._authenticationTokenManager = authenticationTokenManager;
   }
@@ -9,15 +14,9 @@ class RefreshAuthenticationUseCase {
     const { refreshToken } = useCasePayload;
 
     await this._authenticationTokenManager.verifyRefreshToken(refreshToken);
-    const tokenCount =
-      await this._authenticationRepository.checkAvailabilityToken(refreshToken);
-    if (!tokenCount) {
-      const InvariantError = require("../../Commons/exceptions/InvariantError");
-      throw new InvariantError("refresh token tidak ditemukan di database");
-    }
+    await this._authenticationRepository.checkAvailabilityToken(refreshToken);
 
-    const { username, id } =
-      await this._authenticationTokenManager.decodePayload(refreshToken);
+    const { username, id } = await this._authenticationTokenManager.decodePayload(refreshToken);
 
     return this._authenticationTokenManager.createAccessToken({ username, id });
   }
@@ -26,15 +25,11 @@ class RefreshAuthenticationUseCase {
     const { refreshToken } = payload;
 
     if (!refreshToken) {
-      throw new Error(
-        "REFRESH_AUTHENTICATION_USE_CASE.NOT_CONTAIN_REFRESH_TOKEN"
-      );
+      throw new Error('REFRESH_AUTHENTICATION_USE_CASE.NOT_CONTAIN_REFRESH_TOKEN');
     }
 
-    if (typeof refreshToken !== "string") {
-      throw new Error(
-        "REFRESH_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION"
-      );
+    if (typeof refreshToken !== 'string') {
+      throw new Error('REFRESH_AUTHENTICATION_USE_CASE.PAYLOAD_NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
 }

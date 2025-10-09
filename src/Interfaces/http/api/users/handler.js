@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const AddUserUseCase = require('../../../../Applications/use_case/AddUserUseCase');
 
 class UsersHandler {

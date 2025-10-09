@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-underscore-dangle */
 class AddComment {
   constructor(payload) {
     this._verifyPayload(payload);
@@ -10,14 +12,14 @@ class AddComment {
   _verifyPayload(payload) {
     const { content, threadId, owner } = payload;
     if (!content || !threadId || !owner) {
-      throw new Error("ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY");
+      throw new Error('ADD_COMMENT.NOT_CONTAIN_NEEDED_PROPERTY');
     }
     if (
-      typeof content !== "string" ||
-      typeof threadId !== "string" ||
-      typeof owner !== "string"
+      typeof content !== 'string'
+      || typeof threadId !== 'string'
+      || typeof owner !== 'string'
     ) {
-      throw new Error("ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION");
+      throw new Error('ADD_COMMENT.NOT_MEET_DATA_TYPE_SPECIFICATION');
     }
   }
 }

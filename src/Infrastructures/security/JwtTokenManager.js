@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const AuthenticationTokenManager = require('../../Applications/security/AuthenticationTokenManager');
 const InvariantError = require('../../Commons/exceptions/InvariantError');
 

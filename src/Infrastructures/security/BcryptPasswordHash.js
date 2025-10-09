@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 const EncryptionHelper = require('../../Applications/security/PasswordHash');
 const AuthenticationError = require('../../Commons/exceptions/AuthenticationError');
 

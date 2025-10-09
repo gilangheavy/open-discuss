@@ -1,6 +1,7 @@
-const ThreadRepository = require("../../Domains/threads/ThreadRepository");
-const AddedThread = require("../../Domains/threads/entities/AddedThread");
-const Thread = require("../../Domains/threads/entities/Thread");
+/* eslint-disable no-underscore-dangle */
+const ThreadRepository = require('../../Domains/threads/ThreadRepository');
+const AddedThread = require('../../Domains/threads/entities/AddedThread');
+const Thread = require('../../Domains/threads/entities/Thread');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -14,7 +15,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     const id = `thread-${this._idGenerator()}`;
 
     const query = {
-      text: "INSERT INTO threads (id, title, body, owner) VALUES($1, $2, $3, $4) RETURNING id, title, owner",
+      text: 'INSERT INTO threads (id, title, body, owner) VALUES($1, $2, $3, $4) RETURNING id, title, owner',
       values: [id, title, body, owner],
     };
 
@@ -25,7 +26,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async verifyThreadAvailability(threadId) {
     const query = {
-      text: "SELECT 1 FROM threads WHERE id = $1",
+      text: 'SELECT 1 FROM threads WHERE id = $1',
       values: [threadId],
     };
 
@@ -35,7 +36,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
 
   async getThreadById(threadId) {
     const query = {
-      text: "SELECT threads.id, threads.title, threads.body, threads.date, users.username FROM threads JOIN users ON threads.owner = users.id WHERE threads.id = $1",
+      text: 'SELECT threads.id, threads.title, threads.body, threads.date, users.username FROM threads JOIN users ON threads.owner = users.id WHERE threads.id = $1',
       values: [threadId],
     };
 
@@ -44,8 +45,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (!thread) {
       return undefined;
     }
-    const threadDate =
-      thread.date instanceof Date ? thread.date : new Date(thread.date);
+    const threadDate = thread.date instanceof Date ? thread.date : new Date(thread.date);
 
     return new Thread({
       ...thread,

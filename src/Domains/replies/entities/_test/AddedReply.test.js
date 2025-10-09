@@ -1,40 +1,40 @@
-const AddedReply = require("../AddedReply");
+const AddedReply = require('../AddedReply');
 
-describe("an AddedReply entity", () => {
+describe('an AddedReply entity', () => {
   // ... existing test for success case ...
-  it("should throw error when payload did not contain needed property", () => {
+  it('should throw error when payload did not contain needed property', () => {
     // Arrange
     const payload = {
-      id: "reply-123",
-      content: "some reply",
+      id: 'reply-123',
+      content: 'some reply',
     }; // Missing 'owner' property
 
     // Action & Assert
     expect(() => new AddedReply(payload)).toThrowError(
-      "ADDED_REPLY.NOT_CONTAIN_NEEDED_PROPERTY"
+      'ADDED_REPLY.NOT_CONTAIN_NEEDED_PROPERTY',
     );
   });
 
-  it("should throw error when payload did not meet data type specification", () => {
+  it('should throw error when payload did not meet data type specification', () => {
     // Arrange
     const payload = {
       id: 123, // Not a string
-      content: "some reply",
+      content: 'some reply',
       owner: true, // Not a string
     };
 
     // Action & Assert
     expect(() => new AddedReply(payload)).toThrowError(
-      "ADDED_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION"
+      'ADDED_REPLY.NOT_MEET_DATA_TYPE_SPECIFICATION',
     );
   });
 
-  it("should create addedReply object correctly", () => {
+  it('should create addedReply object correctly', () => {
     // Arrange
     const payload = {
-      id: "reply-123",
-      content: "a valid reply",
-      owner: "user-123",
+      id: 'reply-123',
+      content: 'a valid reply',
+      owner: 'user-123',
     };
 
     // Action
