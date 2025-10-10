@@ -5,13 +5,14 @@ class Thread {
     this._verifyPayload(payload);
 
     const {
-      id, title, body, date, username, comments,
+      id, title, body, date, username, comments = [],
     } = payload;
 
     this.id = id;
     this.title = title;
     this.body = body;
-    this.date = date;
+    // Normalisasi di domain: terima string atau Date, simpan sebagai Date
+    this.date = date instanceof Date ? date : new Date(date);
     this.username = username;
     this.comments = comments;
   }
@@ -19,15 +20,14 @@ class Thread {
   _verifyPayload({
     id, title, body, date, username, comments,
   }) {
-    if (!id || !title || !body || !date || !username || !comments) {
+    if (!id || !title || !body || !date || !username || comments === undefined) {
       throw new Error('THREAD.NOT_CONTAIN_NEEDED_PROPERTY');
     }
-
     if (
       typeof id !== 'string'
       || typeof title !== 'string'
       || typeof body !== 'string'
-      || !(date instanceof Date)
+      || (typeof date !== 'string' && !(date instanceof Date))
       || typeof username !== 'string'
       || !Array.isArray(comments)
     ) {

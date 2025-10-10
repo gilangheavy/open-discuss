@@ -45,11 +45,9 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (!thread) {
       return undefined;
     }
-    const threadDate = thread.date instanceof Date ? thread.date : new Date(thread.date);
 
     return new Thread({
       ...thread,
-      date: threadDate,
       comments: [],
     });
   }
