@@ -52,7 +52,7 @@ describe('GetThreadUseCase', () => {
   it('should orchestrating the get thread action correctly', async () => {
     // Arrange
     const threadId = 'thread-123';
-    const mockThread = new Thread({
+    const threadPayload = new Thread({
       id: 'thread-123',
       title: 'sebuah thread',
       body: 'sebuah body thread',
@@ -63,9 +63,7 @@ describe('GetThreadUseCase', () => {
 
     const mockThreadRepository = new ThreadRepository();
 
-    mockThreadRepository.getThreadById = jest
-      .fn()
-      .mockImplementation(() => Promise.resolve(mockThread));
+    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(new Thread(threadPayload));
 
     const threadUseCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
@@ -75,7 +73,7 @@ describe('GetThreadUseCase', () => {
     const thread = await threadUseCase.getThread(threadId);
 
     // Assert
-    expect(thread).toStrictEqual(mockThread);
+    expect(thread).toStrictEqual(new Thread(threadPayload));
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
   });
 
