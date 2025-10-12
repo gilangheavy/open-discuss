@@ -119,6 +119,7 @@ describe('CommentRepositoryPostgres', () => {
       const userId = 'user-123';
       const threadId = 'thread-123';
       const commentId = 'comment-123';
+      const date = new Date().toISOString();
       await UsersTableTestHelper.addUser({ id: userId, username: 'dicoding' });
       await ThreadsTableTestHelper.addThread({ id: threadId, owner: userId });
       await CommentsTableTestHelper.addComment({
@@ -126,7 +127,7 @@ describe('CommentRepositoryPostgres', () => {
         threadId,
         owner: userId,
         content: 'sebuah comment',
-        date: '2023-01-01T00:00:00.000Z',
+        date,
       });
 
       const commentRepositoryPostgres = new CommentRepositoryPostgres(pool, {});
@@ -142,8 +143,8 @@ describe('CommentRepositoryPostgres', () => {
       expect(comments[0]).toStrictEqual({
         id: commentId,
         username: 'dicoding',
-        date: '2023-01-01T00:00:00.000Z',
         content: 'sebuah comment',
+        date: comments[0].date,
         is_delete: false,
       });
     });

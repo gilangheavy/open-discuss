@@ -42,10 +42,7 @@ class ReplyRepositoryPostgres extends ReplyRepository {
 
     const result = await this._pool.query(query);
 
-    return result.rows.map((row) => ({
-      ...row,
-      date: new Date(row.date).toISOString(),
-    }));
+    return result.rows;
   }
 
   async deleteReply(replyId) {
