@@ -2,6 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 const AddThread = require('../../Domains/threads/entities/AddThread');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const Thread = require('../../Domains/threads/entities/Thread');
 
 class ThreadUseCase {
   constructor({ threadRepository }) {
@@ -18,7 +19,12 @@ class ThreadUseCase {
     if (!thread) {
       throw new NotFoundError('thread tidak ditemukan');
     }
-    return thread;
+    const threadEntity = new Thread({
+      ...thread,
+      comments: [],
+    });
+
+    return threadEntity;
   }
 }
 

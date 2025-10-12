@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const ThreadRepository = require('../../Domains/threads/ThreadRepository');
 const AddedThread = require('../../Domains/threads/entities/AddedThread');
-const Thread = require('../../Domains/threads/entities/Thread');
 
 class ThreadRepositoryPostgres extends ThreadRepository {
   constructor(pool, idGenerator) {
@@ -45,11 +44,7 @@ class ThreadRepositoryPostgres extends ThreadRepository {
     if (!thread) {
       return undefined;
     }
-
-    return new Thread({
-      ...thread,
-      comments: [],
-    });
+    return thread;
   }
 }
 

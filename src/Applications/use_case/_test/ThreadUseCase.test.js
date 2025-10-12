@@ -52,18 +52,18 @@ describe('GetThreadUseCase', () => {
   it('should orchestrating the get thread action correctly', async () => {
     // Arrange
     const threadId = 'thread-123';
-    const threadPayload = new Thread({
+    const rawThread = {
       id: 'thread-123',
       title: 'sebuah thread',
       body: 'sebuah body thread',
       date: new Date(),
       username: 'dicoding',
-      comments: [],
-    });
+      // repository returns raw row -> no comments field here
+    };
 
     const mockThreadRepository = new ThreadRepository();
-
-    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(new Thread(threadPayload));
+    // mock returns raw object (not new Thread instance)
+    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(rawThread);
 
     const threadUseCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
@@ -72,8 +72,8 @@ describe('GetThreadUseCase', () => {
     // Action
     const thread = await threadUseCase.getThread(threadId);
 
-    // Assert
-    expect(thread).toStrictEqual(new Thread(threadPayload));
+    // Assert: expected is a Domain Thread created from the raw data
+    expect(thread).toStrictEqual(new Thread({ ...rawThread, comments: [] }));
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
   });
 

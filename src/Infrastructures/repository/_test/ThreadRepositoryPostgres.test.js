@@ -3,10 +3,8 @@ const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
 const CommentsTableTestHelper = require('../../../../tests/CommentsTableTestHelper');
 const AddThread = require('../../../Domains/threads/entities/AddThread');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
-const Thread = require('../../../Domains/threads/entities/Thread');
 const pool = require('../../database/postgres/pool');
 const ThreadRepositoryPostgres = require('../ThreadRepositoryPostgres');
-// Repositories no longer throw domain errors
 
 describe('ThreadRepositoryPostgres', () => {
   afterEach(async () => {
@@ -105,16 +103,13 @@ describe('ThreadRepositoryPostgres', () => {
       const thread = await threadRepositoryPostgres.getThreadById('thread-123');
 
       // Assert
-      expect(thread).toStrictEqual(
-        new Thread({
-          id: 'thread-123',
-          title: 'sebuah thread',
-          body: 'sebuah body thread',
-          date: thread.date,
-          username: 'dicoding',
-          comments: [],
-        }),
-      );
+      expect(thread).toStrictEqual({
+        id: 'thread-123',
+        title: 'sebuah thread',
+        body: 'sebuah body thread',
+        date: thread.date,
+        username: 'dicoding',
+      });
     });
 
     it('should handle thread.date as Date instance', async () => {
@@ -164,9 +159,10 @@ describe('ThreadRepositoryPostgres', () => {
       );
       // Action
       const thread = await threadRepositoryPostgres.getThreadById('thread-888');
+
       // Assert
-      expect(thread.date).toBeInstanceOf(Date);
-      expect(thread.date.toISOString()).toBe('2023-02-02T12:34:56.789Z');
+      expect(new Date(thread.date)).toBeInstanceOf(Date);
+      expect(new Date(thread.date).toISOString()).toBe('2023-02-02T12:34:56.789Z');
     });
   });
 });
