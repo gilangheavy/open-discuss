@@ -1,7 +1,6 @@
 const ThreadsHandler = require('../handler');
 const ThreadUseCase = require('../../../../../Applications/use_case/ThreadUseCase');
-const CommentRepository = require('../../../../../Domains/comments/CommentRepository');
-const ReplyRepository = require('../../../../../Domains/replies/ReplyRepository');
+// mapping moved into use case
 
 describe('ThreadsHandler getThreadByIdHandler date formatting branch', () => {
   it('should convert Date instance to ISO string (covering instanceof Date branch)', async () => {
@@ -11,7 +10,7 @@ describe('ThreadsHandler getThreadByIdHandler date formatting branch', () => {
       id: 'thread-123',
       title: 'a title',
       body: 'a body',
-      date: dateObj, // Date instance to hit the true branch
+      date: dateObj,
       username: 'dicoding',
     };
 
@@ -19,17 +18,11 @@ describe('ThreadsHandler getThreadByIdHandler date formatting branch', () => {
       getInstance: (name) => {
         if (name === ThreadUseCase.name) {
           return {
-            getThread: jest.fn().mockResolvedValue(fakeThread),
-          };
-        }
-        if (name === CommentRepository.name) {
-          return {
-            getCommentsByThreadId: jest.fn().mockResolvedValue([]),
-          };
-        }
-        if (name === ReplyRepository.name) {
-          return {
-            getRepliesByCommentId: jest.fn().mockResolvedValue([]),
+            getThread: jest.fn().mockResolvedValue({
+              ...fakeThread,
+              date: dateObj.toISOString(),
+              comments: [],
+            }),
           };
         }
         throw new Error(`Unexpected dependency request: ${name}`);

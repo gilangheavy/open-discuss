@@ -1,7 +1,6 @@
 const ThreadsHandler = require('../handler');
 const ThreadUseCase = require('../../../../../Applications/use_case/ThreadUseCase');
-const CommentRepository = require('../../../../../Domains/comments/CommentRepository');
-const ReplyRepository = require('../../../../../Domains/replies/ReplyRepository');
+// mapping moved into use case
 
 describe('ThreadsHandler getThreadByIdHandler deleted content branches', () => {
   it('should replace content with deletion markers for deleted comment and reply', async () => {
@@ -10,7 +9,7 @@ describe('ThreadsHandler getThreadByIdHandler deleted content branches', () => {
       id: 'thread-123',
       title: 'a title',
       body: 'a body',
-      date: '2023-08-17T10:20:30.000Z', // string path (other branch already covered elsewhere)
+      date: '2023-08-17T10:20:30.000Z',
       username: 'dicoding',
     };
 
@@ -33,13 +32,27 @@ describe('ThreadsHandler getThreadByIdHandler deleted content branches', () => {
     const mockContainer = {
       getInstance: (name) => {
         if (name === ThreadUseCase.name) {
-          return { getThread: jest.fn().mockResolvedValue(fakeThread) };
-        }
-        if (name === CommentRepository.name) {
-          return { getCommentsByThreadId: jest.fn().mockResolvedValue([deletedComment]) };
-        }
-        if (name === ReplyRepository.name) {
-          return { getRepliesByCommentId: jest.fn().mockResolvedValue([deletedReply]) };
+          return {
+            getThread: jest.fn().mockResolvedValue({
+              ...fakeThread,
+              comments: [
+                {
+                  id: deletedComment.id,
+                  username: deletedComment.username,
+                  date: deletedComment.date,
+                  content: '**komentar telah dihapus**',
+                  replies: [
+                    {
+                      id: deletedReply.id,
+                      username: deletedReply.username,
+                      date: deletedReply.date,
+                      content: '**balasan telah dihapus**',
+                    },
+                  ],
+                },
+              ],
+            }),
+          };
         }
         throw new Error(`Unexpected dependency request: ${name}`);
       },

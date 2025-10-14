@@ -1,7 +1,8 @@
 const AddThread = require('../../../Domains/threads/entities/AddThread');
 const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
-const Thread = require('../../../Domains/threads/entities/Thread');
+const CommentRepository = require('../../../Domains/comments/CommentRepository');
+const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
 const ThreadUseCase = require('../ThreadUseCase');
 
 describe('AddThreadUseCase', () => {
@@ -28,6 +29,8 @@ describe('AddThreadUseCase', () => {
 
     const threadUseCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: new CommentRepository(),
+      replyRepository: new ReplyRepository(),
     });
 
     // Action
@@ -49,43 +52,101 @@ describe('AddThreadUseCase', () => {
 });
 
 describe('GetThreadUseCase', () => {
-  it('should orchestrating the get thread action correctly', async () => {
+  it('should orchestrate fetching thread with comments and replies, mapping fields and dates', async () => {
     // Arrange
     const threadId = 'thread-123';
     const rawThread = {
       id: 'thread-123',
       title: 'sebuah thread',
       body: 'sebuah body thread',
-      date: new Date(),
+      date: new Date('2023-08-17T10:20:30.000Z'),
       username: 'dicoding',
-      // repository returns raw row -> no comments field here
     };
+    const commentsRaw = [
+      {
+        id: 'comment-1', username: 'userA', date: '2023-08-17T10:21:00.000Z', content: 'konten', is_delete: false,
+      },
+      {
+        id: 'comment-2', username: 'userB', date: '2023-08-17T10:22:00.000Z', content: 'hapus', is_delete: true,
+      },
+    ];
+    const repliesRaw = [
+      {
+        id: 'reply-1', username: 'userC', date: new Date('2023-08-17T10:23:00.000Z'), content: 'balasan', is_delete: false,
+      },
+    ];
 
     const mockThreadRepository = new ThreadRepository();
-    // mock returns raw object (not new Thread instance)
-    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(rawThread);
+    const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
 
-    const threadUseCase = new ThreadUseCase({
+    mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(rawThread);
+    mockCommentRepository.getCommentsByThreadId = jest.fn().mockResolvedValue(commentsRaw);
+    mockReplyRepository.getRepliesByCommentId = jest.fn()
+      .mockResolvedValueOnce(repliesRaw) // for comment-1
+      .mockResolvedValueOnce([]); // for comment-2
+
+    const useCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
     });
 
     // Action
-    const thread = await threadUseCase.getThread(threadId);
+    const view = await useCase.getThread(threadId);
 
-    // Assert: expected is a Domain Thread created from the raw data
-    expect(thread).toStrictEqual(new Thread({ ...rawThread, comments: [] }));
+    // Assert
+    expect(view).toEqual({
+      id: rawThread.id,
+      title: rawThread.title,
+      body: rawThread.body,
+      date: '2023-08-17T10:20:30.000Z',
+      username: rawThread.username,
+      comments: [
+        {
+          id: 'comment-1',
+          username: 'userA',
+          date: '2023-08-17T10:21:00.000Z',
+          content: 'konten',
+          replies: [
+            {
+              id: 'reply-1',
+              username: 'userC',
+              date: '2023-08-17T10:23:00.000Z',
+              content: 'balasan',
+            },
+          ],
+        },
+        {
+          id: 'comment-2',
+          username: 'userB',
+          date: '2023-08-17T10:22:00.000Z',
+          content: '**komentar telah dihapus**',
+          replies: [],
+        },
+      ],
+    });
+
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
+    expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
+    expect(mockReplyRepository.getRepliesByCommentId).toBeCalledTimes(2);
   });
 
   it('should throw NotFoundError when thread is not found', async () => {
     // Arrange
     const threadId = 'thread-not-exist';
     const mockThreadRepository = new ThreadRepository();
+    const mockCommentRepository = new CommentRepository();
+    const mockReplyRepository = new ReplyRepository();
     mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(null);
-    const threadUseCase = new ThreadUseCase({ threadRepository: mockThreadRepository });
+    const useCase = new ThreadUseCase({
+      threadRepository: mockThreadRepository,
+      commentRepository: mockCommentRepository,
+      replyRepository: mockReplyRepository,
+    });
 
     // Action & Assert
-    await expect(threadUseCase.getThread(threadId)).rejects.toThrowError('thread tidak ditemukan');
+    await expect(useCase.getThread(threadId)).rejects.toThrowError('thread tidak ditemukan');
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
   });
 });

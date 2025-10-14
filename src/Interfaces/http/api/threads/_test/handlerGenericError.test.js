@@ -2,8 +2,6 @@ const createServer = require('../../../../../Infrastructures/http/createServer')
 const container = require('../../../../../Infrastructures/container');
 const ThreadUseCase = require('../../../../../Applications/use_case/ThreadUseCase');
 
-// We will temporarily monkey-patch container.getInstance to throw generic error for ThreadUseCase
-
 describe('ThreadsHandler generic error branch', () => {
   let originalGetInstance;
 

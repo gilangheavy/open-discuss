@@ -2,8 +2,6 @@
 const ReplyUseCase = require('../../../../Applications/use_case/ReplyUseCase');
 const ThreadUseCase = require('../../../../Applications/use_case/ThreadUseCase');
 const CommentUseCase = require('../../../../Applications/use_case/CommentUseCase');
-const CommentRepository = require('../../../../Domains/comments/CommentRepository');
-const ReplyRepository = require('../../../../Domains/replies/ReplyRepository');
 
 class ThreadsHandler {
   constructor(container) {
@@ -34,55 +32,10 @@ class ThreadsHandler {
   async getThreadByIdHandler(request, h) {
     try {
       const threadUseCase = this._container.getInstance(ThreadUseCase.name);
-      const commentRepository = this._container.getInstance(
-        CommentRepository.name,
-      );
-      const replyRepository = this._container.getInstance(ReplyRepository.name);
       const thread = await threadUseCase.getThread(request.params.threadId);
-      const commentsRaw = await commentRepository.getCommentsByThreadId(
-        request.params.threadId,
-      );
-      const comments = await Promise.all(
-        commentsRaw.map(async (comment) => {
-          const repliesRaw = await replyRepository.getRepliesByCommentId(
-            comment.id,
-          );
-          const replies = repliesRaw.map((reply) => ({
-            id: reply.id,
-            content: reply.is_delete
-              ? '**balasan telah dihapus**'
-              : reply.content,
-            date: reply.date,
-            username: reply.username,
-          }));
-
-          return {
-            id: comment.id,
-            username: comment.username,
-            date: comment.date,
-            content: comment.is_delete
-              ? '**komentar telah dihapus**'
-              : comment.content,
-            replies,
-          };
-        }),
-      );
-      comments.sort((a, b) => new Date(a.date) - new Date(b.date));
       const response = h.response({
         status: 'success',
-        data: {
-          thread: {
-            id: thread.id,
-            title: thread.title,
-            body: thread.body,
-            date:
-              thread.date instanceof Date
-                ? thread.date.toISOString()
-                : thread.date,
-            username: thread.username,
-            comments,
-          },
-        },
+        data: { thread },
       });
       response.code(200);
       return response;
