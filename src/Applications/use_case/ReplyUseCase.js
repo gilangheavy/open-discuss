@@ -1,7 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 const AddReply = require('../../Domains/replies/entities/AddReply');
-const NotFoundError = require('../../Commons/exceptions/NotFoundError');
-const AuthorizationError = require('../../Commons/exceptions/AuthorizationError');
+const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 
 class ReplyUseCase {
   constructor({ threadRepository, commentRepository, replyRepository }) {
@@ -11,41 +10,37 @@ class ReplyUseCase {
   }
 
   async addReply(useCasePayload, threadId, commentId, owner) {
-    const threadCount = await this._threadRepository.verifyThreadAvailability(
-      threadId,
-    );
+    const threadCount = await this._threadRepository.verifyThreadAvailability(threadId);
     if (!threadCount) {
-      throw new NotFoundError('thread tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('THREAD.NOT_FOUND'));
     }
     const commentCount = await this._commentRepository.verifyCommentAvailability(commentId);
     if (!commentCount) {
-      throw new NotFoundError('komentar tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('COMMENT.NOT_FOUND'));
     }
     const addReply = new AddReply({ ...useCasePayload, commentId, owner });
     return this._replyRepository.addReply(addReply);
   }
 
   async deleteReply(threadId, commentId, replyId, owner) {
-    const threadCount = await this._threadRepository.verifyThreadAvailability(
-      threadId,
-    );
+    const threadCount = await this._threadRepository.verifyThreadAvailability(threadId);
     if (!threadCount) {
-      throw new NotFoundError('thread tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('THREAD.NOT_FOUND'));
     }
     const commentCount = await this._commentRepository.verifyCommentAvailability(commentId);
     if (!commentCount) {
-      throw new NotFoundError('komentar tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('COMMENT.NOT_FOUND'));
     }
     const replyExists = await this._replyRepository.verifyReplyAvailability(replyId);
     if (!replyExists) {
-      throw new NotFoundError('balasan tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('REPLY.NOT_FOUND'));
     }
     const reply = await this._replyRepository.verifyReplyOwner(replyId);
     if (!reply) {
-      throw new NotFoundError('balasan tidak ditemukan');
+      throw DomainErrorTranslator.translate(new Error('REPLY.NOT_FOUND'));
     }
     if (reply.owner !== owner) {
-      throw new AuthorizationError('anda tidak berhak mengakses resource ini');
+      throw DomainErrorTranslator.translate(new Error('REPLY.ACCESS_DENIED'));
     }
     await this._replyRepository.deleteReply(replyId);
   }

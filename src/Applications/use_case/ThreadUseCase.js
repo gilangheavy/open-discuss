@@ -2,6 +2,7 @@
 /* eslint-disable no-underscore-dangle */
 const AddThread = require('../../Domains/threads/entities/AddThread');
 const NotFoundError = require('../../Commons/exceptions/NotFoundError');
+const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 const Thread = require('../../Domains/threads/entities/Thread');
 
 class ThreadUseCase {
@@ -17,7 +18,7 @@ class ThreadUseCase {
   async getThread(threadId) {
     const thread = await this._threadRepository.getThreadById(threadId);
     if (!thread) {
-      throw new NotFoundError('thread tidak ditemukan');
+      throw new NotFoundError(DomainErrorTranslator.translate(new Error('THREAD.NOT_FOUND')));
     }
     const threadEntity = new Thread({
       ...thread,
