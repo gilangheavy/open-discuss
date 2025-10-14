@@ -15,7 +15,6 @@ describe('ReplyUseCase', () => {
     mockThreadRepository = new ThreadRepository();
     mockCommentRepository = new CommentRepository();
     mockReplyRepository = new ReplyRepository();
-    // Mocking the methods of the repositories
     mockThreadRepository.verifyThreadAvailability = jest.fn(() => Promise.resolve(1));
     mockCommentRepository.verifyCommentAvailability = jest.fn(() => Promise.resolve(1));
     mockReplyRepository.addReply = jest.fn(() => Promise.resolve({}));

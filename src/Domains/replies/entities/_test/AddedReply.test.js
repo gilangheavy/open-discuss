@@ -1,13 +1,12 @@
 const AddedReply = require('../AddedReply');
 
 describe('an AddedReply entity', () => {
-  // ... existing test for success case ...
   it('should throw error when payload did not contain needed property', () => {
     // Arrange
     const payload = {
       id: 'reply-123',
       content: 'some reply',
-    }; // Missing 'owner' property
+    };
 
     // Action & Assert
     expect(() => new AddedReply(payload)).toThrowError(
@@ -18,9 +17,9 @@ describe('an AddedReply entity', () => {
   it('should throw error when payload did not meet data type specification', () => {
     // Arrange
     const payload = {
-      id: 123, // Not a string
+      id: 123,
       content: 'some reply',
-      owner: true, // Not a string
+      owner: true,
     };
 
     // Action & Assert

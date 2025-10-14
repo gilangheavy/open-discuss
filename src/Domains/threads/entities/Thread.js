@@ -11,7 +11,6 @@ class Thread {
     this.id = id;
     this.title = title;
     this.body = body;
-    // Normalisasi di domain: terima string atau Date, simpan sebagai Date
     this.date = date instanceof Date ? date : new Date(date);
     this.username = username;
     this.comments = comments;

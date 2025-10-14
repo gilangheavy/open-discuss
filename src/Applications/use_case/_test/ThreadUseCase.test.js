@@ -83,8 +83,8 @@ describe('GetThreadUseCase', () => {
     mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(rawThread);
     mockCommentRepository.getCommentsByThreadId = jest.fn().mockResolvedValue(commentsRaw);
     mockReplyRepository.getRepliesByCommentId = jest.fn()
-      .mockResolvedValueOnce(repliesRaw) // for comment-1
-      .mockResolvedValueOnce([]); // for comment-2
+      .mockResolvedValueOnce(repliesRaw)
+      .mockResolvedValueOnce([]);
 
     const useCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,

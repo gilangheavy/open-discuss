@@ -80,7 +80,6 @@ describe('Comment entities', () => {
       username: 'dicoding',
       date: new Date(),
       content: 'komentar baru',
-      // isDelete sengaja tidak disertakan
     };
 
     // Action
