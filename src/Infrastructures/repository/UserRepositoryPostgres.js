@@ -1,5 +1,4 @@
 /* eslint-disable no-underscore-dangle */
-const InvariantError = require('../../Commons/exceptions/InvariantError');
 const RegisteredUser = require('../../Domains/users/entities/RegisteredUser');
 const UserRepository = require('../../Domains/users/UserRepository');
 
@@ -18,9 +17,8 @@ class UserRepositoryPostgres extends UserRepository {
 
     const result = await this._pool.query(query);
 
-    if (result.rowCount) {
-      throw new InvariantError('username tidak tersedia');
-    }
+    // Return rowCount: 0 = available, > 0 = tidak available
+    return result.rowCount;
   }
 
   async addUser(registerUser) {
@@ -45,11 +43,8 @@ class UserRepositoryPostgres extends UserRepository {
 
     const result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new InvariantError('username tidak ditemukan');
-    }
-
-    return result.rows[0].password;
+    // Return password jika ada, undefined jika tidak ada
+    return result.rows[0]?.password;
   }
 
   async getIdByUsername(username) {
@@ -60,13 +55,8 @@ class UserRepositoryPostgres extends UserRepository {
 
     const result = await this._pool.query(query);
 
-    if (!result.rowCount) {
-      throw new InvariantError('user tidak ditemukan');
-    }
-
-    const { id } = result.rows[0];
-
-    return id;
+    // Return id jika ada, undefined jika tidak ada
+    return result.rows[0]?.id;
   }
 }
 

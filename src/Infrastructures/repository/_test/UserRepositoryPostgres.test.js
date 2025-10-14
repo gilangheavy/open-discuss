@@ -1,5 +1,4 @@
 const UsersTableTestHelper = require('../../../../tests/UsersTableTestHelper');
-const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const RegisterUser = require('../../../Domains/users/entities/RegisterUser');
 const RegisteredUser = require('../../../Domains/users/entities/RegisteredUser');
 const pool = require('../../database/postgres/pool');
@@ -15,21 +14,27 @@ describe('UserRepositoryPostgres', () => {
   });
 
   describe('verifyAvailableUsername function', () => {
-    it('should throw InvariantError when username not available', async () => {
+    it('should return count > 0 when username not available', async () => {
       // Arrange
-      await UsersTableTestHelper.addUser({ username: 'dicoding' }); // memasukan user baru dengan username dicoding
+      await UsersTableTestHelper.addUser({ username: 'dicoding' });
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 
-      // Action & Assert
-      await expect(userRepositoryPostgres.verifyAvailableUsername('dicoding')).rejects.toThrowError(InvariantError);
+      // Action
+      const count = await userRepositoryPostgres.verifyAvailableUsername('dicoding');
+
+      // Assert: count > 0 berarti username sudah ada
+      expect(count).toBeGreaterThan(0);
     });
 
-    it('should not throw InvariantError when username available', async () => {
+    it('should return count 0 when username available', async () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 
-      // Action & Assert
-      await expect(userRepositoryPostgres.verifyAvailableUsername('dicoding')).resolves.not.toThrowError(InvariantError);
+      // Action
+      const count = await userRepositoryPostgres.verifyAvailableUsername('dicoding');
+
+      // Assert: count === 0 berarti username available
+      expect(count).toBe(0);
     });
   });
 
@@ -75,14 +80,15 @@ describe('UserRepositoryPostgres', () => {
   });
 
   describe('getPasswordByUsername', () => {
-    it('should throw InvariantError when user not found', () => {
+    it('should return undefined when user not found', async () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 
-      // Action & Assert
-      return expect(userRepositoryPostgres.getPasswordByUsername('dicoding'))
-        .rejects
-        .toThrowError(InvariantError);
+      // Action
+      const password = await userRepositoryPostgres.getPasswordByUsername('dicoding');
+
+      // Assert: return undefined jika user tidak ada
+      expect(password).toBeUndefined();
     });
 
     it('should return username password when user is found', async () => {
@@ -93,21 +99,24 @@ describe('UserRepositoryPostgres', () => {
         password: 'secret_password',
       });
 
-      // Action & Assert
+      // Action
       const password = await userRepositoryPostgres.getPasswordByUsername('dicoding');
+
+      // Assert
       expect(password).toBe('secret_password');
     });
   });
 
   describe('getIdByUsername', () => {
-    it('should throw InvariantError when user not found', async () => {
+    it('should return undefined when user not found', async () => {
       // Arrange
       const userRepositoryPostgres = new UserRepositoryPostgres(pool, {});
 
-      // Action & Assert
-      await expect(userRepositoryPostgres.getIdByUsername('dicoding'))
-        .rejects
-        .toThrowError(InvariantError);
+      // Action
+      const userId = await userRepositoryPostgres.getIdByUsername('dicoding');
+
+      // Assert: return undefined jika user tidak ada
+      expect(userId).toBeUndefined();
     });
 
     it('should return user id correctly', async () => {

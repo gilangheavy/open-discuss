@@ -1,7 +1,5 @@
 /* eslint-disable no-underscore-dangle */
-const InvariantError = require('../../Commons/exceptions/InvariantError');
 const AuthenticationRepository = require('../../Domains/authentications/AuthenticationRepository');
-const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 
 class AuthenticationRepositoryPostgres extends AuthenticationRepository {
   constructor(pool) {
@@ -26,9 +24,8 @@ class AuthenticationRepositoryPostgres extends AuthenticationRepository {
 
     const result = await this._pool.query(query);
 
-    if (result.rows.length === 0) {
-      throw new InvariantError(DomainErrorTranslator.translate(new Error('AUTHENTICATION.NOT_FOUND')).message);
-    }
+    // Return count: 0 = tidak ada, > 0 = ada
+    return result.rows.length;
   }
 
   async deleteToken(token) {

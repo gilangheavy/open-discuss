@@ -1,5 +1,8 @@
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-underscore-dangle */
+const InvariantError = require('../../Commons/exceptions/InvariantError');
+const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
+
 class RefreshAuthenticationUseCase {
   constructor({
     authenticationRepository,
@@ -14,7 +17,13 @@ class RefreshAuthenticationUseCase {
     const { refreshToken } = useCasePayload;
 
     await this._authenticationTokenManager.verifyRefreshToken(refreshToken);
-    await this._authenticationRepository.checkAvailabilityToken(refreshToken);
+
+    const tokenCount = await this._authenticationRepository.checkAvailabilityToken(refreshToken);
+    if (tokenCount === 0) {
+      throw new InvariantError(
+        DomainErrorTranslator.translate(new Error('AUTHENTICATION.NOT_FOUND')).message,
+      );
+    }
 
     const { username, id } = await this._authenticationTokenManager.decodePayload(refreshToken);
 

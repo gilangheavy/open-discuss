@@ -1,4 +1,3 @@
-const InvariantError = require('../../../Commons/exceptions/InvariantError');
 const AuthenticationsTableTestHelper = require('../../../../tests/AuthenticationsTableTestHelper');
 const pool = require('../../database/postgres/pool');
 const AuthenticationRepositoryPostgres = require('../AuthenticationRepositoryPostgres');
@@ -29,25 +28,29 @@ describe('AuthenticationRepository postgres', () => {
   });
 
   describe('checkAvailabilityToken function', () => {
-    it('should throw InvariantError if token not available', async () => {
+    it('should return 0 if token not available', async () => {
       // Arrange
       const authenticationRepository = new AuthenticationRepositoryPostgres(pool);
       const token = 'token';
 
-      // Action & Assert
-      await expect(authenticationRepository.checkAvailabilityToken(token))
-        .rejects.toThrow(InvariantError);
+      // Action
+      const count = await authenticationRepository.checkAvailabilityToken(token);
+
+      // Assert: count === 0 berarti token tidak ada
+      expect(count).toBe(0);
     });
 
-    it('should not throw InvariantError if token available', async () => {
+    it('should return count > 0 if token available', async () => {
       // Arrange
       const authenticationRepository = new AuthenticationRepositoryPostgres(pool);
       const token = 'token';
       await AuthenticationsTableTestHelper.addToken(token);
 
-      // Action & Assert
-      await expect(authenticationRepository.checkAvailabilityToken(token))
-        .resolves.not.toThrow(InvariantError);
+      // Action
+      const count = await authenticationRepository.checkAvailabilityToken(token);
+
+      // Assert: count > 0 berarti token ada
+      expect(count).toBeGreaterThan(0);
     });
   });
 

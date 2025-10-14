@@ -4,6 +4,7 @@ const AuthenticationTokenManager = require('../../security/AuthenticationTokenMa
 const PasswordHash = require('../../security/PasswordHash');
 const LoginUserUseCase = require('../LoginUserUseCase');
 const NewAuth = require('../../../Domains/authentications/entities/NewAuth');
+const InvariantError = require('../../../Commons/exceptions/InvariantError');
 
 describe('GetAuthenticationUseCase', () => {
   it('should orchestrating the get authentication action correctly', async () => {
@@ -63,5 +64,69 @@ describe('GetAuthenticationUseCase', () => {
       .toBeCalledWith({ username: 'dicoding', id: 'user-123' });
     expect(mockAuthenticationRepository.addToken)
       .toBeCalledWith(mockedAuthentication.refreshToken);
+  });
+
+  it('should throw InvariantError when username not found', async () => {
+    // Arrange
+    const useCasePayload = {
+      username: 'notfound',
+      password: 'secret',
+    };
+    const mockUserRepository = new UserRepository();
+    const mockAuthenticationRepository = new AuthenticationRepository();
+    const mockAuthenticationTokenManager = new AuthenticationTokenManager();
+    const mockPasswordHash = new PasswordHash();
+
+    mockUserRepository.getPasswordByUsername = jest.fn()
+      .mockImplementation(() => Promise.resolve(undefined)); // return undefined
+
+    const loginUserUseCase = new LoginUserUseCase({
+      userRepository: mockUserRepository,
+      authenticationRepository: mockAuthenticationRepository,
+      authenticationTokenManager: mockAuthenticationTokenManager,
+      passwordHash: mockPasswordHash,
+    });
+
+    // Action & Assert
+    await expect(loginUserUseCase.execute(useCasePayload))
+      .rejects
+      .toThrowError(InvariantError);
+    await expect(loginUserUseCase.execute(useCasePayload))
+      .rejects
+      .toThrowError('username tidak ditemukan');
+  });
+
+  it('should throw InvariantError when user id not found', async () => {
+    // Arrange
+    const useCasePayload = {
+      username: 'dicoding',
+      password: 'secret',
+    };
+    const mockUserRepository = new UserRepository();
+    const mockAuthenticationRepository = new AuthenticationRepository();
+    const mockAuthenticationTokenManager = new AuthenticationTokenManager();
+    const mockPasswordHash = new PasswordHash();
+
+    mockUserRepository.getPasswordByUsername = jest.fn()
+      .mockImplementation(() => Promise.resolve('encrypted_password'));
+    mockPasswordHash.comparePassword = jest.fn()
+      .mockImplementation(() => Promise.resolve());
+    mockUserRepository.getIdByUsername = jest.fn()
+      .mockImplementation(() => Promise.resolve(undefined)); // return undefined
+
+    const loginUserUseCase = new LoginUserUseCase({
+      userRepository: mockUserRepository,
+      authenticationRepository: mockAuthenticationRepository,
+      authenticationTokenManager: mockAuthenticationTokenManager,
+      passwordHash: mockPasswordHash,
+    });
+
+    // Action & Assert
+    await expect(loginUserUseCase.execute(useCasePayload))
+      .rejects
+      .toThrowError(InvariantError);
+    await expect(loginUserUseCase.execute(useCasePayload))
+      .rejects
+      .toThrowError('user tidak ditemukan');
   });
 });
