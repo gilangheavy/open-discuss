@@ -30,26 +30,14 @@ class ThreadsHandler {
   }
 
   async getThreadByIdHandler(request, h) {
-    try {
-      const threadUseCase = this._container.getInstance(ThreadUseCase.name);
-      const thread = await threadUseCase.getThread(request.params.threadId);
-      const response = h.response({
-        status: 'success',
-        data: { thread },
-      });
-      response.code(200);
-      return response;
-    } catch (error) {
-      if (error.name === 'NotFoundError') {
-        const response = h.response({
-          status: 'fail',
-          message: error.message,
-        });
-        response.code(404);
-        return response;
-      }
-      throw error;
-    }
+    const threadUseCase = this._container.getInstance(ThreadUseCase.name);
+    const thread = await threadUseCase.getThread(request.params.threadId);
+    const response = h.response({
+      status: 'success',
+      data: { thread },
+    });
+    response.code(200);
+    return response;
   }
 
   async postCommentHandler(request, h) {

@@ -3,7 +3,7 @@ const ThreadUseCase = require('../../../../../Applications/use_case/ThreadUseCas
 const NotFoundError = require('../../../../../Commons/exceptions/NotFoundError');
 
 describe('ThreadsHandler getThreadByIdHandler NotFound branch', () => {
-  it('should respond 404 and fail status when thread not found', async () => {
+  it('should throw NotFoundError when thread not found (let middleware handle)', async () => {
     // Arrange
     const mockContainer = {
       getInstance: (name) => {
@@ -30,12 +30,13 @@ describe('ThreadsHandler getThreadByIdHandler NotFound branch', () => {
       },
     };
 
-    // Act
-    const response = await handler.getThreadByIdHandler(request, h);
+    // Act & Assert: handler should throw error, not handle it
+    await expect(handler.getThreadByIdHandler(request, h))
+      .rejects
+      .toThrow(NotFoundError);
 
-    // Assert
-    expect(response.statusCode).toBe(404);
-    expect(response.source.status).toBe('fail');
-    expect(response.source.message).toBe('thread tidak ditemukan');
+    await expect(handler.getThreadByIdHandler(request, h))
+      .rejects
+      .toThrow('thread tidak ditemukan');
   });
 });
