@@ -14,6 +14,7 @@ Aplikasi forum dikembangkan secara bertahap dan saat ini diharapkan sudah memili
 - Melihat Thread;
 - Menambahkan dan Menghapus Komentar pada Thread; serta
 - Menambahkan dan Menghapus Balasan Komentar Thread (opsional).
+- Menyukai dan Batal Menyukai Komentar (opsional).
 
 # Kriteria Forum API
 
@@ -340,3 +341,59 @@ Response yang harus dikembalikan:
     - status: “fail”
     - message: Pesan apapun selama tidak kosong.
 - Balasan dihapus secara soft delete, alias tidak benar-benar dihapus dari database. Anda bisa membuat dan memanfaatkan kolom seperti is_delete sebagai indikator apakah komentar dihapus atau tidak.
+
+## Opsional 3 : Menyukai dan Batal Menyukai Komentar
+
+API harus dapat menyukai/batal menyukai komentar thread melalui route:
+
+- Method: PUT
+- Path: /threads/{threadId}/comments/{commentId}/likes
+
+Response yang dikembalikan:
+
+- Status code: 200
+- Response body:
+
+```
+{
+    "status": "success"
+}
+```
+
+Ketentuan:
+
+- Menyukai dan batal menyukai komentar thread merupakan resource yang dibatasi (restrict). Untuk mengaksesnya membutuhkan access token guna mengetahui siapa yang menyukai komentar.
+- Untuk menyukai dan batal menyukai diakses melalui method dan route yang sama.
+- Bila user tidak menyukai komentar, maka aksinya adalah menyukai komentar. Jika user sudah menyukai komentar, maka aksinya adalah batal menyukai komentar.
+- Jumlah suka (likeCount) pada komentar thread harus ditampilkan pada setiap item comments ketika mengakses detail thread. Contohnya seperti ini:
+
+```
+{
+    "status": "success",
+    "data": {
+        "thread": {
+            "id": "thread-PJByal62zobLFhUggQo2m",
+            "title": "sebuah thread",
+            "body": "sebuah body thread",
+            "date": "2021-08-13T05:17:12.994Z",
+            "username": "dicoding",
+            "comments": [
+                {
+                    "id": "comment-6ptWTV9l16szB-kTKWvy_",
+                    "username": "dicoding",
+                    "date": "2021-08-13T05:17:13.024Z",
+                    "content": "sebuah comment",
+                    "likeCount": 2
+                },
+                {
+                    "id": "comment-_KSz7hz-ox__kqTtCjslD",
+                    "username": "johndoe",
+                    "date": "2021-08-13T05:17:13.057Z",
+                    "content": "sebuah comment",
+                    "likeCount": 1
+                }
+            ]
+        }
+    }
+}
+```
