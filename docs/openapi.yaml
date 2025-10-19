@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Forum API
   version: 1.0.0
-  description: |-
+  description: |
     The back-end API for the Forum forum application, a platform for Garuda Game players to discuss games and share experiences.
     Built with Clean Architecture principles for scalability and maintainability.
 
@@ -11,6 +11,8 @@ servers:
     description: Development server
 
 tags:
+  - name: Health
+    description: Application health check
   - name: Users
     description: User registration operations
   - name: Authentication
@@ -20,9 +22,24 @@ tags:
   - name: Comments
     description: Operations for managing comments within threads
   - name: Replies
-    description: (Optional) Operations for managing replies to comments
+    description: Operations for managing replies to comments
   - name: Likes
-    description: (Optional) Operations for liking/unliking comments
+    description: Operations for liking/unliking comments
+
+x-tagGroups:
+  - name: Application
+    tags:
+      - Health
+  - name: Users & Authentication
+    tags:
+      - Users
+      - Authentication
+  - name: Forum Features
+    tags:
+      - Threads
+      - Comments
+      - Replies
+      - Likes
 
 components:
   securitySchemes:
@@ -255,6 +272,34 @@ components:
           example: "terjadi kegagalan pada server kami"
 
 paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Check application health
+      description: Check application health and database connectivity
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  message:
+                    type: string
+                    example: Server is healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  database:
+                    type: string
+                    example: connected
+        '503':
+          description: Service unavailable - Database connection failed
+
   /users:
     post:
       tags: [Users]

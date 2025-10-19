@@ -51,7 +51,7 @@ This layer acts as the entry point for external clients, adapting their requests
 This is the outermost layer, containing all the concrete implementations and glue code.
 
 - **Repository Implementations** (e.g., `Infrastructures/repository/UserRepositoryPostgres.js`): This is where the abstract repository interfaces from the `Domains` layer are implemented. `UserRepositoryPostgres` implements the `UserRepository` contract using the `node-postgres` library to interact with a PostgreSQL database.
-- **Security Implementations** (e.g., `Infrastructures/security/BcryptPasswordHash.js`): This provides the concrete implementation for the `PasswordHash` interface, using the `bcrypt` library.
+- **Security Implementations** (e.g., `Infrastructures/security/BcryptPasswordHash.js`, `Infrastructures/security/JwtTokenManager.js`): This provides the concrete implementation for the `PasswordHash` and `AuthenticationTokenManager` interfaces, using the `bcrypt` and `jwt` libraries respectively.
 - **HTTP Server** (`Infrastructures/http/createServer.js`): This file configures and creates the Hapi.js server instance, registers routes, and sets up authentication strategies and error handling.
 - **Database Pool** (`Infrastructures/database/postgres/pool.js`): Manages the connection pool to the PostgreSQL database.
 - **Dependency Injection Container** (`Infrastructures/container.js`): This is a crucial file. It uses the `instances-container` library to implement **Dependency Injection**. It registers all the classes and their dependencies, wiring the entire application together. When a use case asks for a `UserRepository`, the container knows to provide a `UserRepositoryPostgres` instance. This makes the application modular and easy to test.

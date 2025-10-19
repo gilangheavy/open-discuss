@@ -24,9 +24,6 @@ The initial version of the Forum API will support the following features:
 - **View a Thread** (with comments)
 - **Add a Comment** to a thread
 - **Delete a Comment** from a thread
-
-### 2.2. Optional Features
-
 - **Add a Reply** to a comment
 - **Delete a Reply**
 - **Like/Unlike a Comment**
@@ -82,7 +79,7 @@ The initial version of the Forum API will support the following features:
     1. Install dependencies (`npm ci`)
     2. Run linter (`npm run lint` - must pass with zero errors)
     3. Run tests (`npm test` - all tests must pass)
-    4. Check test coverage (must achieve 100% coverage)
+    4. Check test coverage (must achieve 100% for statements, functions, and lines, and 98.12% for branches)
     5. Security audit (`npm audit` - no high/critical vulnerabilities)
   - **Branch Protection**: Pull requests must pass all CI checks before merge.
 
@@ -139,9 +136,9 @@ The following endpoints require a valid access token in the `Authorization` head
 - `POST /threads`
 - `POST /threads/{threadId}/comments`
 - `DELETE /threads/{threadId}/comments/{commentId}`
-- `POST /threads/{threadId}/comments/{commentId}/replies` (Optional)
-- `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}` (Optional)
-- `PUT /threads/{threadId}/comments/{commentId}/likes` (Optional)
+- `POST /threads/{threadId}/comments/{commentId}/replies`
+- `DELETE /threads/{threadId}/comments/{commentId}/replies/{replyId}`
+- `PUT /threads/{threadId}/comments/{commentId}/likes`
 - `PUT /authentications` (refresh token)
 - `DELETE /authentications` (logout)
 
@@ -363,8 +360,8 @@ All API endpoints must enforce the following validation rules:
 - **Success Response (200 OK)**:
   - Comments must be sorted by their creation date in **ascending** order.
   - Deleted comments should have their content replaced with `**komentar telah dihapus**`.
-  - (Optional) Replies should be included, sorted by creation date, with deleted replies' content replaced by `**balasan telah dihapus**`.
-  - (Optional) `likeCount` should be included for each comment.
+  - Replies should be included, sorted by creation date, with deleted replies' content replaced by `**balasan telah dihapus**`.
+  - `likeCount` should be included for each comment.
   ```json
   {
     "status": "success",
@@ -439,7 +436,7 @@ All API endpoints must enforce the following validation rules:
 
 ---
 
-#### **Replies (Optional)**
+#### **Replies**
 
 ##### `POST /threads/{threadId}/comments/{commentId}/replies` - Add a Reply
 
@@ -478,7 +475,7 @@ All API endpoints must enforce the following validation rules:
 
 ---
 
-#### **Likes (Optional)**
+#### **Likes**
 
 ##### `PUT /threads/{threadId}/comments/{commentId}/likes` - Like or Unlike a Comment
 
@@ -497,8 +494,7 @@ All API endpoints must enforce the following validation rules:
 
 ### 6.1. Test Coverage
 
-- **Minimum Coverage**: 100% for statements, functions, and lines.
-- **Branch Coverage**: Target 100%, minimum 95%.
+- **Minimum Coverage**: 100% for statements, functions, and lines. 98.12% for branches.
 - **Coverage Tool**: Jest with Istanbul.
 - **Coverage Report**: Must be generated and reviewed before deployment.
 
@@ -567,22 +563,19 @@ All API endpoints must enforce the following validation rules:
 - ✅ Comment owner can delete their own comment (soft delete)
 - ✅ Deleted comments show as "**komentar telah dihapus**"
 - ✅ Comments are sorted by date ascending
-
-**Optional Features (Minimum 2 of 3):**
-
-- ⭕ Authenticated user can add reply to a comment
-- ⭕ Reply owner can delete their own reply (soft delete)
-- ⭕ Deleted replies show as "**balasan telah dihapus**"
-- ⭕ Replies are sorted by date ascending
-- ⭕ Authenticated user can like/unlike a comment (toggle)
-- ⭕ Comment `likeCount` is displayed in thread details
+- ✅ Authenticated user can add reply to a comment
+- ✅ Reply owner can delete their own reply (soft delete)
+- ✅ Deleted replies show as "**balasan telah dihapus**"
+- ✅ Replies are sorted by date ascending
+- ✅ Authenticated user can like/unlike a comment (toggle)
+- ✅ Comment `likeCount` is displayed in thread details
 
 ### 7.2. Quality Gates
 
 **Code Quality:**
 
 - ✅ 100% test coverage (statements, functions, lines)
-- ✅ 95%+ branch coverage
+- ✅ 98.12% branch coverage
 - ✅ All tests passing (unit + integration + e2e)
 - ✅ Zero ESLint errors
 - ✅ Clean Architecture layers strictly enforced:
@@ -610,8 +603,8 @@ All API endpoints must enforce the following validation rules:
 - ✅ Automated testing on every push and pull request
 - ✅ All CI checks must pass:
   - ESLint (zero errors)
-  - All tests pass (170 tests)
-  - 100% test coverage
+  - All tests pass (198 tests)
+  - 100% test coverage for statements, functions, and lines, and 98.12% for branches
   - npm audit clean (no high/critical vulnerabilities)
 - ✅ Branch protection enabled on `master` and `development`
 - ✅ Pull request reviews required before merge
@@ -630,12 +623,6 @@ All API endpoints must enforce the following validation rules:
   - Description and notes
 - ✅ JWT authentication documented in Swagger
 - ✅ API version and contact information included
-
-**Performance (Development Environment):**
-
-- ✅ GET /threads/{threadId} response time < 200ms (P95)
-- ✅ POST endpoints response time < 500ms (P95)
-- ✅ Database queries optimized (no N+1 queries)
 
 ### 7.3. Documentation
 
@@ -723,16 +710,15 @@ NODE_ENV=development
 
 The project is considered complete when:
 
-1. All 6 mandatory features are implemented and tested
-2. At least 2 of 3 optional features are implemented
-3. All acceptance criteria in Section 7 are met
-4. Code review passes (Clean Architecture compliance)
-5. 100% test coverage achieved
-6. **CI/CD pipeline configured and operational** (GitHub Actions)
-7. **All security measures implemented** (SQL injection prevention, rate limiting, HTTPS)
-8. **GitHub Actions workflow passes all checks** (lint, test, coverage, audit)
-9. **API Documentation implemented** (Hapi-Swagger with OpenAPI 3.0)
-10. Documentation is complete and accurate
+1. All mandatory features are implemented and tested
+2. All acceptance criteria in Section 7 are met
+3. Code review passes (Clean Architecture compliance)
+4. 100% test coverage for statements, functions, and lines, and 98.12% for branches achieved
+5. **CI/CD pipeline configured and operational** (GitHub Actions)
+6. **All security measures implemented** (SQL injection prevention, rate limiting, HTTPS)
+7. **GitHub Actions workflow passes all checks** (lint, test, coverage, audit)
+8. **API Documentation implemented** (Hapi-Swagger with OpenAPI 3.0)
+9. Documentation is complete and accurate
 
 ### 9.2. Production Readiness
 
@@ -835,7 +821,7 @@ The project must implement a comprehensive CI/CD pipeline using GitHub Actions. 
     PGDATABASE_TEST: forumapi_test
 ```
 
-- All tests must pass (170 tests expected)
+- All tests must pass (198 tests expected)
 - Requires PostgreSQL service container
 - Test database configured via environment variables
 
@@ -852,7 +838,7 @@ The project must implement a comprehensive CI/CD pipeline using GitHub Actions. 
     fi
 ```
 
-- Must achieve 100% code coverage
+- Must achieve 100% code coverage for statements, functions, and lines, and 98.12% for branches
 - Coverage report uploaded as artifact
 - Fails if coverage drops below 100%
 
@@ -895,7 +881,7 @@ services:
 - Require status checks to pass before merging:
   - ✅ Lint check
   - ✅ All tests pass
-  - ✅ 100% coverage achieved
+  - ✅ 100% coverage for statements, functions, and lines, and 98.12% for branches achieved
   - ✅ Security audit clean
 - Require branches to be up to date before merging
 - Do not allow force pushes
@@ -1102,7 +1088,9 @@ Add to `src/Infrastructures/http/createServer.js`:
 const HapiSwagger = require("hapi-swagger");
 const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
-const Pack = require("../../../package.json");
+const path = require('path');
+const fs = require('fs');
+const yaml = require('js-yaml');
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -1110,40 +1098,29 @@ const createServer = async (container) => {
     port: process.env.PORT,
   });
 
-  // Swagger configuration
+  // Load OpenAPI spec from YAML file
+  const openapiPath = path.join(__dirname, '../../../docs/openapi.yaml');
+  const openapiContent = fs.readFileSync(openapiPath, 'utf8');
+  const openapiSpec = yaml.load(openapiContent);
+
+  // Register Swagger documentation (before JWT to avoid auth on /documentation)
   const swaggerOptions = {
-    info: {
-      title: "Forum API Documentation",
-      version: Pack.version,
-      description: "Forum API for Garuda Game community",
-      contact: {
-        name: "API Support",
-        email: "support@garudagame.com",
-      },
-    },
-    tags: [
-      { name: "users", description: "User registration endpoints" },
-      {
-        name: "authentications",
-        description: "Login, logout, and token refresh",
-      },
-      { name: "threads", description: "Thread management" },
-      { name: "comments", description: "Comment management" },
-      { name: "replies", description: "Reply management (optional)" },
-      { name: "likes", description: "Comment likes (optional)" },
-    ],
+    info: openapiSpec.info,
+    tags: openapiSpec.tags,
     securityDefinitions: {
       jwt: {
-        type: "apiKey",
-        name: "Authorization",
-        in: "header",
-        description: "JWT token in format: Bearer {token}",
+        type: 'apiKey',
+        name: 'Authorization',
+        in: 'header',
+        description: 'JWT Access Token. Format: Bearer {token}',
       },
     },
     security: [{ jwt: [] }],
-    grouping: "tags",
-    sortTags: "name",
-    sortEndpoints: "ordered",
+    grouping: 'tags',
+    sortEndpoints: 'ordered',
+    documentationPath: '/documentation',
+    swaggerUIPath: '/documentation/',
+    auth: false,
   };
 
   // Register Swagger before routes

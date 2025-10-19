@@ -3,6 +3,7 @@ const AddedThread = require('../../../Domains/threads/entities/AddedThread');
 const ThreadRepository = require('../../../Domains/threads/ThreadRepository');
 const CommentRepository = require('../../../Domains/comments/CommentRepository');
 const ReplyRepository = require('../../../Domains/replies/ReplyRepository');
+const LikeRepository = require('../../../Domains/likes/LikeRepository');
 const ThreadUseCase = require('../ThreadUseCase');
 
 describe('AddThreadUseCase', () => {
@@ -31,6 +32,7 @@ describe('AddThreadUseCase', () => {
       threadRepository: mockThreadRepository,
       commentRepository: new CommentRepository(),
       replyRepository: new ReplyRepository(),
+      likeRepository: new LikeRepository(),
     });
 
     // Action
@@ -79,17 +81,22 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
 
     mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(rawThread);
     mockCommentRepository.getCommentsByThreadId = jest.fn().mockResolvedValue(commentsRaw);
     mockReplyRepository.getRepliesByCommentId = jest.fn()
       .mockResolvedValueOnce(repliesRaw)
       .mockResolvedValueOnce([]);
+    mockLikeRepository.getLikeCount = jest.fn()
+      .mockResolvedValueOnce(2)
+      .mockResolvedValueOnce(0);
 
     const useCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action
@@ -108,6 +115,7 @@ describe('GetThreadUseCase', () => {
           username: 'userA',
           date: '2023-08-17T10:21:00.000Z',
           content: 'konten',
+          likeCount: 2,
           replies: [
             {
               id: 'reply-1',
@@ -122,6 +130,7 @@ describe('GetThreadUseCase', () => {
           username: 'userB',
           date: '2023-08-17T10:22:00.000Z',
           content: '**komentar telah dihapus**',
+          likeCount: 0,
           replies: [],
         },
       ],
@@ -130,6 +139,7 @@ describe('GetThreadUseCase', () => {
     expect(mockThreadRepository.getThreadById).toBeCalledWith(threadId);
     expect(mockCommentRepository.getCommentsByThreadId).toBeCalledWith(threadId);
     expect(mockReplyRepository.getRepliesByCommentId).toBeCalledTimes(2);
+    expect(mockLikeRepository.getLikeCount).toBeCalledTimes(2);
   });
 
   it('should throw NotFoundError when thread is not found', async () => {
@@ -138,11 +148,13 @@ describe('GetThreadUseCase', () => {
     const mockThreadRepository = new ThreadRepository();
     const mockCommentRepository = new CommentRepository();
     const mockReplyRepository = new ReplyRepository();
+    const mockLikeRepository = new LikeRepository();
     mockThreadRepository.getThreadById = jest.fn().mockResolvedValue(null);
     const useCase = new ThreadUseCase({
       threadRepository: mockThreadRepository,
       commentRepository: mockCommentRepository,
       replyRepository: mockReplyRepository,
+      likeRepository: mockLikeRepository,
     });
 
     // Action & Assert
