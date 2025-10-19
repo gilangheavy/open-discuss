@@ -1,4 +1,4 @@
-# Copilot instructions for Open Discuss (Forum API)
+# Copilot instructions for Forum API
 
 Use these project-specific rules to be productive immediately. Stick to the existing layering and patterns; prefer concrete examples below.
 

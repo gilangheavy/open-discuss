@@ -1,4 +1,4 @@
-# Open Discuss — Forum API
+# Forum API
 
 Backend API built with Hapi, PostgreSQL, and JWT authentication. Includes users, authentications, threads, comments, and replies.
 

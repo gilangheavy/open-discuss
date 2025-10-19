@@ -1,16 +1,57 @@
 /* eslint-disable global-require */
 const Hapi = require('@hapi/hapi');
+const Inert = require('@hapi/inert');
+const Vision = require('@hapi/vision');
+const HapiSwagger = require('hapi-swagger');
+const path = require('path');
+const fs = require('fs');
+const yaml = require('js-yaml');
 const ClientError = require('../../Commons/exceptions/ClientError');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 const users = require('../../Interfaces/http/api/users');
 const authentications = require('../../Interfaces/http/api/authentications');
 const threads = require('../../Interfaces/http/api/threads');
+const health = require('../../Interfaces/http/api/health');
 
 const createServer = async (container) => {
   const server = Hapi.server({
     host: process.env.HOST,
     port: process.env.PORT,
   });
+
+  // Load OpenAPI spec from YAML file
+  const openapiPath = path.join(__dirname, '../../../docs/openapi.yaml');
+  const openapiContent = fs.readFileSync(openapiPath, 'utf8');
+  const openapiSpec = yaml.load(openapiContent);
+
+  // Register Swagger documentation (before JWT to avoid auth on /documentation)
+  const swaggerOptions = {
+    info: openapiSpec.info,
+    tags: openapiSpec.tags,
+    securityDefinitions: {
+      jwt: {
+        type: 'apiKey',
+        name: 'Authorization',
+        in: 'header',
+        description: 'JWT Access Token. Format: Bearer {token}',
+      },
+    },
+    security: [{ jwt: [] }],
+    grouping: 'tags',
+    sortEndpoints: 'ordered',
+    documentationPath: '/documentation',
+    swaggerUIPath: '/documentation/',
+    auth: false,
+  };
+
+  await server.register([
+    Inert,
+    Vision,
+    {
+      plugin: HapiSwagger,
+      options: swaggerOptions,
+    },
+  ]);
 
   await server.register(require('@hapi/jwt'));
 
@@ -31,6 +72,10 @@ const createServer = async (container) => {
   });
 
   await server.register([
+    {
+      plugin: health,
+      options: { container },
+    },
     {
       plugin: users,
       options: { container },

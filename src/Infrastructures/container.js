@@ -34,6 +34,9 @@ const ReplyRepositoryPostgres = require('./repository/ReplyRepositoryPostgres');
 const ThreadUseCase = require('../Applications/use_case/ThreadUseCase');
 const CommentUseCase = require('../Applications/use_case/CommentUseCase');
 const ReplyUseCase = require('../Applications/use_case/ReplyUseCase');
+const HealthCheckUseCase = require('../Applications/use_case/HealthCheckUseCase');
+const HealthRepository = require('../Domains/health/HealthRepository');
+const HealthRepositoryPostgres = require('./repository/HealthRepositoryPostgres');
 
 // creating container
 const container = createContainer();
@@ -81,6 +84,15 @@ container.register([
       dependencies: [
         { concrete: pool },
         { concrete: nanoid },
+      ],
+    },
+  },
+  {
+    key: HealthRepository.name,
+    Class: HealthRepositoryPostgres,
+    parameter: {
+      dependencies: [
+        { concrete: pool },
       ],
     },
   },
@@ -224,6 +236,19 @@ container.register([
         {
           name: 'authenticationTokenManager',
           internal: AuthenticationTokenManager.name,
+        },
+      ],
+    },
+  },
+  {
+    key: HealthCheckUseCase.name,
+    Class: HealthCheckUseCase,
+    parameter: {
+      injectType: 'destructuring',
+      dependencies: [
+        {
+          name: 'healthRepository',
+          internal: HealthRepository.name,
         },
       ],
     },
