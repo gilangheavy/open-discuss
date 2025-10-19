@@ -1,102 +1,154 @@
+# GitHub Actions CI/CD Pipeline Configuration
+# This workflow automates code quality checks, testing, and security audits
+# Runs automatically when a Pull Request is created targeting the master branch
+
 name: CI/CD Pipeline
 
+# Trigger Configuration
+# 'on' defines when this workflow should run
 on:
-  push:
-    branches: [main, develop, development]
   pull_request:
-    branches: [main, develop, development]
+    branches: [master]  # Only trigger when PR targets master branch
 
+# Jobs Configuration
+# Jobs run in parallel by default unless dependencies are specified with 'needs'
 jobs:
+  # Job 1: Lint - Code Quality Check
+  # Verifies code style and catches syntax errors using ESLint
+  # Runs first as a quick check before running expensive tests
   lint:
     name: Lint Code
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # Uses GitHub-hosted Ubuntu runner
 
     steps:
+      # Step 1: Clone the repository code
+      # actions/checkout@v4 is a reusable action that checks out your repo
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Install Node.js runtime
+      # Uses specific version (22) to ensure consistency across runs
+      # 'cache: npm' speeds up subsequent runs by caching node_modules
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: 'npm'
 
+      # Step 3: Install project dependencies
+      # 'npm ci' is faster and more reliable than 'npm install' for CI
+      # It deletes node_modules and installs from package-lock.json exactly
       - name: Install dependencies
         run: npm ci
 
+      # Step 4: Run ESLint for code quality checks
+      # Executes the 'lint' script defined in package.json
+      # Fails the job if linting errors are found
       - name: Run ESLint
         run: npm run lint
 
+  # Job 2: Test - Automated Testing with Code Coverage
+  # Runs unit and integration tests against a real PostgreSQL database
+  # 'needs: lint' ensures this only runs if lint job passes
   test:
     name: Run Tests
     runs-on: ubuntu-latest
-    needs: lint
+    needs: lint  # Wait for lint to complete successfully
 
+    # Services Configuration
+    # Docker containers that run alongside the job
+    # Useful for databases, caches, message queues, etc.
     services:
       postgres:
-        image: postgres:17
+        image: postgres:17  # PostgreSQL version 17 Docker image
         env:
-          POSTGRES_DB: forumapi_test
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
+          # Environment variables for PostgreSQL container
+          POSTGRES_DB: forumapi_test      # Database name
+          POSTGRES_USER: postgres          # Database user
+          POSTGRES_PASSWORD: postgres      # Database password
         ports:
-          - 5432:5432
+          - 5432:5432  # Map container port 5432 to host port 5432
         options: >-
-          --health-cmd="pg_isready -U postgres"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
+          --health-cmd="pg_isready -U postgres"  # Command to check if DB is ready
+          --health-interval=10s                  # Check every 10 seconds
+          --health-timeout=5s                    # Wait max 5 seconds per check
+          --health-retries=5                     # Retry 5 times before failing
 
+    # Environment Variables
+    # Available to all steps in this job
+    # Used by node-postgres to connect to the database
     env:
-      PGHOST: localhost
-      PGUSER: postgres
-      PGPASSWORD: postgres
-      PGDATABASE: forumapi_test
-      PGPORT: 5432
-      NODE_ENV: test
+      PGHOST: localhost         # Database host
+      PGUSER: postgres          # Database user (matches service config)
+      PGPASSWORD: postgres      # Database password (matches service config)
+      PGDATABASE: forumapi_test # Database name (matches service config)
+      PGPORT: 5432              # Database port
+      NODE_ENV: test            # Node environment (loads test config)
 
     steps:
+      # Step 1: Clone the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Install Node.js with caching
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: 'npm'
 
+      # Step 3: Install dependencies cleanly
       - name: Install dependencies
         run: npm ci
 
+      # Step 4: Run database migrations
+      # Creates all necessary tables and schema in the test database
+      # Uses 'migrate:test' script which targets test database config
       - name: Run migrations
         run: npm run migrate:test
 
+      # Step 5: Execute all tests with coverage reporting
+      # Runs Jest with coverage flags to measure code coverage
+      # Generates coverage reports in multiple formats (lcov, json, html)
       - name: Run tests with coverage
         run: npm run test:coverage
 
+      # Step 6: Upload coverage report to Codecov
+      # Codecov provides coverage visualization and trends
+      # 'fail_ci_if_error: false' prevents upload failures from failing the job
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          files: ./coverage/lcov.info
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
+          files: ./coverage/lcov.info    # Coverage report file
+          flags: unittests                # Tag for organizing reports
+          name: codecov-umbrella          # Display name in Codecov UI
+          fail_ci_if_error: false         # Don't fail if Codecov upload fails
 
+  # Job 3: Audit - Security Vulnerability Check
+  # Scans dependencies for known security vulnerabilities
+  # Runs in parallel with 'test' job (both need 'lint' to pass)
   audit:
     name: Security Audit
     runs-on: ubuntu-latest
-    needs: lint
+    needs: lint  # Wait for lint, but can run parallel with test
 
     steps:
+      # Step 1: Clone the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Step 2: Install Node.js with caching
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
           cache: 'npm'
 
+      # Step 3: Run security audit
+      # Checks npm dependencies against vulnerability database
+      # --audit-level=moderate: Only report moderate+ severity issues
+      # continue-on-error: true allows job to pass with warnings
+      # This prevents blocking PRs for low-severity issues while still reporting them
       - name: Run npm audit
         run: npm audit --audit-level=moderate
         continue-on-error: true
