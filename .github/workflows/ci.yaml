@@ -35,10 +35,11 @@ jobs:
           node-version: "22"
 
       # Step 3: Install project dependencies
-      # 'npm ci' is faster and more reliable than 'npm install' for CI
-      # It deletes node_modules and installs from package-lock.json exactly
+      # Using 'npm install' instead of 'npm ci' because package-lock.json is in .gitignore
+      # npm install: installs from package.json, may generate lock file
+      # npm ci: requires lock file, faster but stricter
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # Step 4: Run ESLint for code quality checks
       # Executes the 'lint' script defined in package.json
@@ -96,9 +97,10 @@ jobs:
         with:
           node-version: "22"
 
-      # Step 3: Install dependencies cleanly
+      # Step 3: Install dependencies
+      # Using 'npm install' instead of 'npm ci' because package-lock.json is in .gitignore
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # Step 4: Run database migrations
       # Creates all necessary tables and schema in the test database
