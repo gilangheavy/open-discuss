@@ -29,7 +29,7 @@ This document tracks the remaining tasks, planned features, and known issues for
 ### Architecture & Testing
 
 - ✅ Clean Architecture implementation (4 layers: Entities, Use Cases, Interface Adapters, Frameworks)
-- ✅ 100% test coverage (177 tests passing - updated October 2025)
+- ✅ 100% test coverage for statements, functions, and lines, and 98.12% for branches (198 tests passing - updated October 2025)
 - ✅ Unit tests for all business logic
 - ✅ Integration tests for repositories
 - ✅ End-to-end tests for HTTP endpoints
@@ -47,6 +47,18 @@ This document tracks the remaining tasks, planned features, and known issues for
 - ✅ Display deleted replies as "**balasan telah dihapus**"
 - ✅ Replies sorted by date ascending
 - ✅ Replies included in thread detail response
+
+### Comment Likes (Optional Feature 3)
+
+- ✅ Create `comment_likes` table migration
+- ✅ Create CommentLike domain entities
+- ✅ Implement LikeRepository (abstract + Postgres)
+- ✅ Create LikeUseCase (toggle like/unlike)
+- ✅ Add like/unlike endpoint: `PUT /threads/{threadId}/comments/{commentId}/likes`
+- ✅ Include `likeCount` in thread detail response
+- ✅ Write unit tests for LikeUseCase
+- ✅ Write integration tests for LikeRepository
+- ✅ Write E2E tests for like endpoint
 
 ---
 
@@ -163,7 +175,7 @@ This document tracks the remaining tasks, planned features, and known issues for
   - ✅ Integration tests for `HealthRepositoryPostgres` (2 tests)
   - ✅ Unit tests for `HealthCheckUseCase` (2 tests)
   - ✅ Integration tests for `/health` endpoint (2 tests)
-  - ✅ All tests passing (177 tests total)
+  - ✅ All tests passing (198 tests total)
 
 - ✅ **Document Health Endpoint**
   - ✅ Add Swagger documentation for `/health`
@@ -263,7 +275,7 @@ This document tracks the remaining tasks, planned features, and known issues for
 
 ---
 
-## � Recent Achievements (October 19, 2025)
+##  Recent Achievements (October 19, 2025)
 
 ### ✅ CI/CD Pipeline Complete
 
@@ -286,7 +298,7 @@ This document tracks the remaining tasks, planned features, and known issues for
 - **Endpoint**: `GET /health` for monitoring
 - **Clean Architecture**: Domain → Use Case → Infrastructure layers
 - **Repository Pattern**: SQL queries isolated in repository
-- **Error Handling**: Use case handles all scenarios (not handler)
+- **Error Handling**: Use case handles all scenarios (not in handler)
 - **Tests**: 7 new tests (domain, repository, use case, integration)
 - **Documentation**: Swagger docs with examples
 
@@ -296,26 +308,7 @@ This document tracks the remaining tasks, planned features, and known issues for
 - **Clean separation**: No try-catch in handlers, moved to use cases
 - **Repository pattern**: All database queries in repository layer
 - **Consistent architecture**: Health check follows same patterns as other features
-- **Test coverage**: Maintained 100% (177 tests passing)
-
----
-
-## �🎯 Remaining Optional Features
-
-### Comment Likes (Optional Feature 3)
-
-- [ ] Create `comment_likes` table migration
-  - [ ] Fields: id, comment_id, owner, created_at
-  - [ ] UNIQUE constraint on (comment_id, owner)
-  - [ ] Foreign keys with CASCADE delete
-- [ ] Create CommentLike domain entities
-- [ ] Implement LikeRepository (abstract + Postgres)
-- [ ] Create LikeUseCase (toggle like/unlike)
-- [ ] Add like/unlike endpoint: `PUT /threads/{threadId}/comments/{commentId}/likes`
-- [ ] Include `likeCount` in thread detail response
-- [ ] Write unit tests for LikeUseCase
-- [ ] Write integration tests for LikeRepository
-- [ ] Write E2E tests for like endpoint
+- **Test coverage**: Maintained 100% for statements, functions, and lines, and 98.12% for branches (198 tests passing)
 
 ---
 
@@ -433,13 +426,13 @@ These features were listed as "Out of Scope" in the current PRD but are potentia
 
 ## 📊 Project Status Summary
 
-**Overall Progress: ~90% Complete** ⬆️ (Updated October 19, 2025)
+**Overall Progress: ~95% Complete** ⬆️ (Updated October 19, 2025)
 
 | Category                 | Status      | Completion          |
 | ------------------------ | ----------- | ------------------- |
-| Mandatory Features       | ✅ Complete | 100% (6/6)          |
+| Mandatory Features       | ✅ Complete | 100% (9/9)          |
 | Optional Features        | ✅ Complete | 100% (3/3) ⬆️       |
-| Testing & Architecture   | ✅ Complete | 100% (177 tests) ⬆️ |
+| Testing & Architecture   | ✅ Complete | 100% (198 tests) ⬆️ |
 | **CI/CD Implementation** | ✅ Complete | **100%** ⬆️         |
 | **API Documentation**    | ✅ Complete | **100%** ⬆️         |
 | **Health Check**         | ✅ Complete | **100%** ⬆️         |
@@ -454,8 +447,7 @@ These features were listed as "Out of Scope" in the current PRD but are potentia
 4. 🔴 **CRITICAL**: Setup SSL/TLS with Let's Encrypt
 5. 🟡 **HIGH**: Deploy to production server (VPS/Cloud)
 6. 🟡 **HIGH**: Setup PM2 process manager
-7. 🟢 **MEDIUM**: Implement Comment Likes feature (optional #3)
-8. 🟢 **MEDIUM**: Add database indexes for performance
+7. 🟢 **MEDIUM**: Add database indexes for performance
 
 ---
 
@@ -466,11 +458,11 @@ These features were listed as "Out of Scope" in the current PRD but are potentia
   - ✅ CI/CD fully implemented with GitHub Actions (lint, test, audit jobs)
   - ✅ API Documentation complete with Swagger UI at `/documentation`
   - ✅ Health Check endpoint implemented with Clean Architecture
-  - ✅ All 177 tests passing with 100% coverage maintained
+  - ✅ All 198 tests passing with 100% coverage for statements, functions, and lines, and 98.12% for branches
   - ✅ All code comments translated to English
 - **API Documentation**: Using **hapi-swagger 14.2.5** for OpenAPI 3.0 generation
 - **PRD Reference**: See `docs/PRD.md` for complete specifications
-- **Coverage Target**: 100% test coverage maintained ✅ (177/177 tests passing)
+- **Coverage Target**: 100% test coverage for statements, functions, and lines, and 98.12% for branches maintained ✅ (198/198 tests passing)
 - **SQL Injection**: All repository methods use parameterized queries ✅
 - **GitHub Actions**: Workflow at `.github/workflows/ci.yaml` fully functional ✅
 - **Swagger UI**: Accessible at `/documentation` with interactive testing ✅

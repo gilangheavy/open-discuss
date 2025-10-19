@@ -44,6 +44,17 @@ const routes = (handler) => [
       auth: 'forumapi_jwt',
     },
   },
+  {
+    method: 'PUT',
+    path: '/threads/{threadId}/comments/{commentId}/likes',
+    handler: handler.putLikeHandler,
+    options: {
+      auth: 'forumapi_jwt',
+      description: 'Toggle like/unlike on a comment',
+      notes: 'Like a comment if not yet liked, unlike if already liked',
+      tags: ['api', 'threads', 'comments', 'likes'],
+    },
+  },
 ];
 
 module.exports = routes;

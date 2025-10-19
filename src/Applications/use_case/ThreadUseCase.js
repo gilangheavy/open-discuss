@@ -4,10 +4,13 @@ const AddThread = require('../../Domains/threads/entities/AddThread');
 const DomainErrorTranslator = require('../../Commons/exceptions/DomainErrorTranslator');
 
 class ThreadUseCase {
-  constructor({ threadRepository, commentRepository, replyRepository }) {
+  constructor({
+    threadRepository, commentRepository, replyRepository, likeRepository,
+  }) {
     this._threadRepository = threadRepository;
     this._commentRepository = commentRepository;
     this._replyRepository = replyRepository;
+    this._likeRepository = likeRepository;
   }
 
   async addThread(useCasePayload, owner) {
@@ -36,6 +39,8 @@ class ThreadUseCase {
           username: reply.username,
         }));
 
+        const likeCount = await this._likeRepository.getLikeCount(comment.id);
+
         return {
           id: comment.id,
           username: comment.username,
@@ -46,6 +51,7 @@ class ThreadUseCase {
           content: comment.is_delete
             ? '**komentar telah dihapus**'
             : comment.content,
+          likeCount,
           replies,
         };
       }),

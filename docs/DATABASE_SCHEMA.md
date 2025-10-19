@@ -66,7 +66,7 @@ CREATE TABLE comments (
 - **thread_id**: Foreign key to threads table
 - **owner**: Foreign key to users table
 
-### 5. Replies Table (Optional)
+### 5. Replies Table
 
 ```sql
 CREATE TABLE replies (
@@ -86,24 +86,23 @@ CREATE TABLE replies (
 - **comment_id**: Foreign key to comments table
 - **owner**: Foreign key to users table
 
-### 6. Comment Likes Table (Optional)
+### 6. Comment Likes Table
 
 ```sql
 CREATE TABLE comment_likes (
   id VARCHAR(50) PRIMARY KEY,
   comment_id VARCHAR(50) NOT NULL,
-  owner VARCHAR(50) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  user_id VARCHAR(50) NOT NULL,
   FOREIGN KEY (comment_id) REFERENCES comments(id) ON DELETE CASCADE,
-  FOREIGN KEY (owner) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE (comment_id, owner)
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE (comment_id, user_id)
 );
 ```
 
 - **id**: Generated using nanoid with prefix `like-`
 - **UNIQUE constraint**: Prevents duplicate likes from same user on same comment
 - **comment_id**: Foreign key to comments table
-- **owner**: Foreign key to users table (the user who liked)
+- **user_id**: Foreign key to users table (the user who liked)
 
 ### 7. Database Indexes (Recommended)
 
