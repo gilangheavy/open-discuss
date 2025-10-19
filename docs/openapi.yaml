@@ -1,0 +1,661 @@
+openapi: 3.0.0
+info:
+  title: Forum API
+  version: 1.0.0
+  description: |-
+    The back-end API for the Forum forum application, a platform for Garuda Game players to discuss games and share experiences.
+    Built with Clean Architecture principles for scalability and maintainability.
+
+servers:
+  - url: http://localhost:5000
+    description: Development server
+
+tags:
+  - name: Users
+    description: User registration operations
+  - name: Authentication
+    description: Operations for user login, logout, and token management
+  - name: Threads
+    description: Operations related to discussion threads
+  - name: Comments
+    description: Operations for managing comments within threads
+  - name: Replies
+    description: (Optional) Operations for managing replies to comments
+  - name: Likes
+    description: (Optional) Operations for liking/unliking comments
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "JWT Access Token required. Enter '''Bearer <token>'''"
+
+  schemas:
+    # Request Bodies
+    NewUser:
+      type: object
+      properties:
+        username:
+          type: string
+          example: dicoding
+          minLength: 3
+          maxLength: 50
+          pattern: '^[a-zA-Z0-9_]+$'
+        password:
+          type: string
+          example: "secret_password"
+          minLength: 8
+        fullname:
+          type: string
+          example: "Dicoding Indonesia"
+          maxLength: 255
+      required: [username, password, fullname]
+
+    LoginPayload:
+      type: object
+      properties:
+        username:
+          type: string
+          example: dicoding
+        password:
+          type: string
+          example: "secret_password"
+      required: [username, password]
+
+    RefreshTokenPayload:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      required: [refreshToken]
+
+    NewThread:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "My First Thread"
+          maxLength: 50
+        body:
+          type: string
+          example: "This is the content of my first thread."
+      required: [title, body]
+
+    NewComment:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "This is a great comment."
+      required: [content]
+
+    NewReply:
+      type: object
+      properties:
+        content:
+          type: string
+          example: "This is a thoughtful reply."
+      required: [content]
+
+    # Success Responses
+    AddedUser:
+      type: object
+      properties:
+        id:
+          type: string
+          example: user-DWrT3pXe1hccYkV1eIAxS
+        username:
+          type: string
+          example: dicoding
+        fullname:
+          type: string
+          example: "Dicoding Indonesia"
+
+    LoginSuccess:
+      type: object
+      properties:
+        accessToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        refreshToken:
+          type: string
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+
+    AddedThread:
+      type: object
+      properties:
+        id:
+          type: string
+          example: thread-h_W1Plfpj0TY7wyT2PUPX
+        title:
+          type: string
+          example: "a thread title"
+        owner:
+          type: string
+          example: user-DWrT3pXe1hccYkV1eIAxS
+
+    AddedComment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: comment-_pby2_tmXV6bcvcdev8xk
+        content:
+          type: string
+          example: "a comment"
+        owner:
+          type: string
+          example: user-CrkY5iAgOdMqv36bIvys2
+
+    AddedReply:
+      type: object
+      properties:
+        id:
+          type: string
+          example: reply-BErOXUSefjwWGW1Z10Ihk
+        content:
+          type: string
+          example: "a reply"
+        owner:
+          type: string
+          example: user-CrkY5iAgOdMqv36bIvys2
+
+    ThreadDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "thread-h_2FkLZhtgBKY2kh4CC02"
+        title:
+          type: string
+          example: "a thread title"
+        body:
+          type: string
+          example: "the body of the thread"
+        date:
+          type: string
+          format: date-time
+          example: "2021-08-08T07:19:09.775Z"
+        username:
+          type: string
+          example: "dicoding"
+        comments:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentDetails'
+
+    CommentDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "comment-_pby2_tmXV6bcvcdev8xk"
+        username:
+          type: string
+          example: "johndoe"
+        date:
+          type: string
+          format: date-time
+          example: "2021-08-08T07:22:33.555Z"
+        content:
+          type: string
+          example: "a comment"
+        likeCount:
+          type: integer
+          format: int32
+          example: 0
+        replies:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReplyDetails'
+
+    ReplyDetails:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "reply-BErOXUSefjwWGW1Z10Ihk"
+        username:
+          type: string
+          example: "jane"
+        date:
+          type: string
+          format: date-time
+        content:
+          type: string
+          example: "a reply"
+
+    # Generic Responses
+    Success:
+      type: object
+      properties:
+        status:
+          type: string
+          example: success
+    Fail:
+      type: object
+      properties:
+        status:
+          type: string
+          example: fail
+        message:
+          type: string
+          example: "A descriptive error message."
+    Error:
+      type: object
+      properties:
+        status:
+          type: string
+          example: error
+        message:
+          type: string
+          example: "terjadi kegagalan pada server kami"
+
+paths:
+  /users:
+    post:
+      tags: [Users]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewUser'
+      responses:
+        '201':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      addedUser:
+                        $ref: '#/components/schemas/AddedUser'
+        '400':
+          description: Bad Request (e.g., invalid input, username taken)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /authentications:
+    post:
+      tags: [Authentication]
+      summary: Login a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginPayload'
+      responses:
+        '201':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    $ref: '#/components/schemas/LoginSuccess'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+    put:
+      tags: [Authentication]
+      summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenPayload'
+      responses:
+        '200':
+          description: Access token refreshed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        '400':
+          description: Refresh token is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+    delete:
+      tags: [Authentication]
+      summary: Logout a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RefreshTokenPayload'
+      responses:
+        '200':
+          description: Logout successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '400':
+          description: Refresh token is missing or invalid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads:
+    post:
+      tags: [Threads]
+      summary: Add a new thread
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewThread'
+      responses:
+        '201':
+          description: Thread created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      addedThread:
+                        $ref: '#/components/schemas/AddedThread'
+        '400':
+          description: Bad Request (e.g., invalid input)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}:
+    get:
+      tags: [Threads]
+      summary: Get thread details
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+            example: "thread-h_2FkLZhtgBKY2kh4CC02"
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      thread:
+                        $ref: '#/components/schemas/ThreadDetails'
+        '404':
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}/comments:
+    post:
+      tags: [Comments]
+      summary: Add a comment to a thread
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewComment'
+      responses:
+        '201':
+          description: Comment added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      addedComment:
+                        $ref: '#/components/schemas/AddedComment'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '404':
+          description: Thread not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}/comments/{commentId}:
+    delete:
+      tags: [Comments]
+      summary: Delete a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Comment deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '403':
+          description: User not authorized to delete this comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '404':
+          description: Thread or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}/comments/{commentId}/replies:
+    post:
+      tags: [Replies]
+      summary: Add a reply to a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewReply'
+      responses:
+        '201':
+          description: Reply added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: success }
+                  data:
+                    type: object
+                    properties:
+                      addedReply:
+                        $ref: '#/components/schemas/AddedReply'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '404':
+          description: Thread or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}/comments/{commentId}/replies/{replyId}:
+    delete:
+      tags: [Replies]
+      summary: Delete a reply
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: replyId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Reply deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '403':
+          description: User not authorized to delete this reply
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '404':
+          description: Thread, comment, or reply not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+
+  /threads/{threadId}/comments/{commentId}/likes:
+    put:
+      tags: [Likes]
+      summary: Like or unlike a comment
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: threadId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Like/unlike action successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Success'
+        '401':
+          description: Missing or invalid token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
+        '404':
+          description: Thread or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fail'
