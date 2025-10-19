@@ -103,7 +103,7 @@ jobs:
       # Creates all necessary tables and schema in the test database
       # Uses 'migrate:test' script which targets test database config
       - name: Run migrations
-        run: npm run migrate:test
+        run: npm run migrate:test up
 
       # Step 5: Execute all tests with coverage reporting
       # Runs Jest with coverage flags to measure code coverage
