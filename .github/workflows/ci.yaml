@@ -99,19 +99,34 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      # Step 4: Run database migrations
+      # Step 4: Create database configuration file
+      # Generate test.json from environment variables
+      # This file is in .gitignore for security reasons
+      - name: Create database config
+        run: |
+          cat > config/database/test.json << EOF
+          {
+            "user": "${{ env.PGUSER }}",
+            "password": "${{ env.PGPASSWORD }}",
+            "host": "${{ env.PGHOST }}",
+            "port": ${{ env.PGPORT }},
+            "database": "${{ env.PGDATABASE }}"
+          }
+          EOF
+
+      # Step 5: Run database migrations
       # Creates all necessary tables and schema in the test database
       # Uses 'migrate:test' script which targets test database config
       - name: Run migrations
         run: npm run migrate:test up
 
-      # Step 5: Execute all tests with coverage reporting
+      # Step 6: Execute all tests with coverage reporting
       # Runs Jest with coverage flags to measure code coverage
       # Generates coverage reports in multiple formats (lcov, json, html)
       - name: Run tests with coverage
         run: npm run test:coverage
 
-      # Step 6: Upload coverage report to Codecov
+      # Step 7: Upload coverage report to Codecov
       # Codecov provides coverage visualization and trends
       # 'fail_ci_if_error: false' prevents upload failures from failing the job
       - name: Upload coverage to Codecov
