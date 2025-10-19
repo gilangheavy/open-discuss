@@ -28,12 +28,11 @@ jobs:
 
       # Step 2: Install Node.js runtime
       # Uses specific version (22) to ensure consistency across runs
-      # 'cache: npm' speeds up subsequent runs by caching node_modules
+      # Note: npm caching is disabled because package-lock.json is in .gitignore
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: 'npm'
 
       # Step 3: Install project dependencies
       # 'npm ci' is faster and more reliable than 'npm install' for CI
@@ -90,12 +89,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Install Node.js with caching
+      # Step 2: Install Node.js
+      # Note: npm caching is disabled because package-lock.json is in .gitignore
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: 'npm'
 
       # Step 3: Install dependencies cleanly
       - name: Install dependencies
@@ -137,12 +136,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Install Node.js with caching
+      # Step 2: Install Node.js
+      # Note: npm caching is disabled because package-lock.json is in .gitignore
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-          cache: 'npm'
 
       # Step 3: Run security audit
       # Checks npm dependencies against vulnerability database
