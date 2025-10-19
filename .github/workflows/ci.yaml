@@ -69,10 +69,7 @@ jobs:
         ports:
           - 5432:5432  # Map container port 5432 to host port 5432
         options: >-
-          --health-cmd="pg_isready -U postgres"  # Command to check if DB is ready
-          --health-interval=10s                  # Check every 10 seconds
-          --health-timeout=5s                    # Wait max 5 seconds per check
-          --health-retries=5                     # Retry 5 times before failing
+          --health-cmd="pg_isready -U postgres" --health-interval=10s --health-timeout=5s --health-retries=5
 
     # Environment Variables
     # Available to all steps in this job
