@@ -1,7 +1,8 @@
-/* eslint-disable class-methods-use-this */
 /* eslint-disable no-underscore-dangle */
 /**
- * Health check handler untuk monitoring status aplikasi dan koneksi database
+ * HealthHandler
+ * HTTP handler for health check endpoint
+ * Follows clean architecture by delegating business logic to use case layer
  */
 class HealthHandler {
   constructor(container) {
@@ -10,39 +11,31 @@ class HealthHandler {
   }
 
   /**
-   * Handler untuk endpoint health check
-   * Memeriksa koneksi database dan mengembalikan status aplikasi
+   * Handler for health check endpoint
+   * Checks database connectivity and returns application health status
+   * No try-catch needed here as use case handles all error scenarios
    *
    * @param {Object} request - Hapi request object
    * @param {Object} h - Hapi response toolkit
-   * @returns {Object} Response dengan status dan message
+   * @returns {Promise<Object>} HTTP response with health status
    */
   async getHealthHandler(request, h) {
-    try {
-      // Import pool directly untuk health check
-      // eslint-disable-next-line global-require
-      const pool = require('../../../../Infrastructures/database/postgres/pool');
+    // Get use case from DI container
+    const healthCheckUseCase = this._container.getInstance(
+      'HealthCheckUseCase',
+    );
 
-      // Test database connection dengan simple query
-      const result = await pool.query('SELECT NOW()');
+    // Execute use case to check health
+    // Use case returns status object with statusCode
+    const result = await healthCheckUseCase.execute();
 
-      const response = h.response({
-        status: 'ok',
-        message: 'Server is healthy',
-        timestamp: result.rows[0].now,
-        database: 'connected',
-      });
-      response.code(200);
-      return response;
-    } catch (error) {
-      const response = h.response({
-        status: 'error',
-        message: 'Database connection failed',
-        error: error.message,
-      });
-      response.code(503);
-      return response;
-    }
+    // Extract statusCode and prepare response payload
+    const { statusCode, ...payload } = result;
+
+    // Return response with appropriate status code
+    const response = h.response(payload);
+    response.code(statusCode);
+    return response;
   }
 }
 

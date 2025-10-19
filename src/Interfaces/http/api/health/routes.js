@@ -2,8 +2,9 @@
 const Joi = require('joi');
 
 /**
- * Routes untuk health check endpoint
- * Endpoint ini digunakan untuk monitoring status aplikasi dan koneksi database
+ * Routes for health check endpoint
+ * This endpoint is used for monitoring application status and database connectivity
+ * Typically called by load balancers, monitoring tools, or CI/CD pipelines
  */
 const routes = (handler) => ([
   {
@@ -11,7 +12,7 @@ const routes = (handler) => ([
     path: '/health',
     handler: handler.getHealthHandler,
     options: {
-      auth: false,
+      auth: false, // No authentication required for health checks
       description: 'Health check endpoint',
       notes: 'Check application health and database connectivity',
       tags: ['api', 'Health'],
