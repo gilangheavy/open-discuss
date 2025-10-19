@@ -1,6 +1,6 @@
 # Project TODO List
 
-This document tracks the remaining tasks, planned features, and known issues for the Open Discuss API project. It is based on the project's Product Requirements Document (PRD).
+This document tracks the remaining tasks, planned features, and known issues for the Forum API project. It is based on the project's Product Requirements Document (PRD).
 
 ---
 

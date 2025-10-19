@@ -1,4 +1,4 @@
-# Product Requirements Document: Open Discuss API
+# Product Requirements Document: Forum API API
 
 ## 1. Introduction
 
@@ -1115,7 +1115,7 @@ const createServer = async (container) => {
     info: {
       title: "Forum API Documentation",
       version: Pack.version,
-      description: "Open Discuss - Forum API for Garuda Game community",
+      description: "Forum API for Garuda Game community",
       contact: {
         name: "API Support",
         email: "support@garudagame.com",

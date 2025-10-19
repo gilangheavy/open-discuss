@@ -36,7 +36,7 @@ jobs:
       postgres:
         image: postgres:17
         env:
-          POSTGRES_DB: open_discuss_test
+          POSTGRES_DB: forumapi_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
@@ -51,7 +51,7 @@ jobs:
       PGHOST: localhost
       PGUSER: postgres
       PGPASSWORD: postgres
-      PGDATABASE: open_discuss_test
+      PGDATABASE: forumapi_test
       PGPORT: 5432
       NODE_ENV: test
 
