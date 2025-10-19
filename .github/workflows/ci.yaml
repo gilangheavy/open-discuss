@@ -81,6 +81,8 @@ jobs:
       PGDATABASE: forumapi_test # Database name (matches service config)
       PGPORT: 5432              # Database port
       NODE_ENV: test            # Node environment (loads test config)
+      ACCESS_TOKEN_KEY: test_access_token_secret_key_for_ci   # JWT access token secret
+      REFRESH_TOKEN_KEY: test_refresh_token_secret_key_for_ci # JWT refresh token secret
 
     steps:
       # Step 1: Clone the repository
