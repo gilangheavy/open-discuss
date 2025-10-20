@@ -1,0 +1,19 @@
+services:
+  app:
+    build: .
+    container_name: open-discuss
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+    networks:
+      - forum-api-network
+    command: npm run start
+    restart: unless-stopped
+
+networks:
+  forum-api-network:
+    driver: bridge
