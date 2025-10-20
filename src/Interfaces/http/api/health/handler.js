@@ -1,4 +1,6 @@
 /* eslint-disable no-underscore-dangle */
+const autoBind = require('auto-bind');
+
 /**
  * HealthHandler
  * HTTP handler for health check endpoint
@@ -7,7 +9,8 @@
 class HealthHandler {
   constructor(container) {
     this._container = container;
-    this.getHealthHandler = this.getHealthHandler.bind(this);
+
+    autoBind(this);
   }
 
   /**
