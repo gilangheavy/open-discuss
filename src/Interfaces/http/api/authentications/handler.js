@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+const autoBind = require('auto-bind');
 const LoginUserUseCase = require('../../../../Applications/use_case/LoginUserUseCase');
 const RefreshAuthenticationUseCase = require('../../../../Applications/use_case/RefreshAuthenticationUseCase');
 const LogoutUserUseCase = require('../../../../Applications/use_case/LogoutUserUseCase');
@@ -7,9 +8,7 @@ class AuthenticationsHandler {
   constructor(container) {
     this._container = container;
 
-    this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
-    this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
-    this.deleteAuthenticationHandler = this.deleteAuthenticationHandler.bind(this);
+    autoBind(this);
   }
 
   async postAuthenticationHandler(request, h) {

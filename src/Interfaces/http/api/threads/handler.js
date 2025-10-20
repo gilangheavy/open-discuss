@@ -1,4 +1,5 @@
 /* eslint-disable no-underscore-dangle */
+const autoBind = require('auto-bind');
 const ReplyUseCase = require('../../../../Applications/use_case/ReplyUseCase');
 const ThreadUseCase = require('../../../../Applications/use_case/ThreadUseCase');
 const CommentUseCase = require('../../../../Applications/use_case/CommentUseCase');
@@ -7,13 +8,8 @@ const LikeUseCase = require('../../../../Applications/use_case/LikeUseCase');
 class ThreadsHandler {
   constructor(container) {
     this._container = container;
-    this.postThreadHandler = this.postThreadHandler.bind(this);
-    this.getThreadByIdHandler = this.getThreadByIdHandler.bind(this);
-    this.postCommentHandler = this.postCommentHandler.bind(this);
-    this.deleteCommentHandler = this.deleteCommentHandler.bind(this);
-    this.postReplyHandler = this.postReplyHandler.bind(this);
-    this.deleteReplyHandler = this.deleteReplyHandler.bind(this);
-    this.putLikeHandler = this.putLikeHandler.bind(this);
+
+    autoBind(this);
   }
 
   async postThreadHandler(request, h) {
