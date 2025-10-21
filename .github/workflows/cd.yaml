@@ -1,0 +1,46 @@
+# GitHub Actions Continuous Deployment Pipeline
+# This workflow automates deployment to production server
+# Runs automatically when code is pushed to master branch (after CI checks pass)
+
+name: Continuous Deployment
+
+# Trigger Configuration
+# Runs on direct push to master (typically after PR merge)
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  # Deploy Job - SSH into production server and update application
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Connect to production server via SSH and deploy
+      # Uses appleboy/ssh-action to execute remote commands
+      # Requires SSH credentials stored as GitHub Secrets
+      - name: SSH and deploy app
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}         # Production server IP/hostname
+          username: ${{ secrets.SSH_USERNAME }} # SSH user (e.g., 'ubuntu', 'deploy')
+          key: ${{ secrets.SSH_KEY }}           # SSH private key (stored in secrets)
+          port: ${{ secrets.SSH_PORT }}         # SSH port (typically 22)
+          script: |
+            # Navigate to application directory
+            cd ~/open-discuss
+            
+            # Pull latest code from master branch
+            git pull origin master
+            
+            # Install/update dependencies
+            npm install
+            
+            # Run database migrations (creates/updates tables)
+            npm run migrate up
+            
+            # Restart application using PM2 process manager
+            # PM2 manages the Node.js process and keeps it running
+            pm2 restart open-discuss

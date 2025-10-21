@@ -1,6 +1,11 @@
 # Forum API
 
+[![Continuous Deployment](https://github.com/gilangheavy/open-discuss/actions/workflows/cd.yaml/badge.svg)](https://github.com/gilangheavy/open-discuss/actions/workflows/cd.yaml)
+[![CI/CD Pipeline](https://github.com/gilangheavy/open-discuss/actions/workflows/ci.yaml/badge.svg)](https://github.com/gilangheavy/open-discuss/actions/workflows/ci.yaml)
+
 A robust and scalable backend API for a forum application, built with Node.js, Hapi, and PostgreSQL. It provides a clean, layered architecture for managing users, authentication, threads, comments, and replies.
+
+**🚀 Production API:** [https://giant-frogs-brush-bravely.a276.dcdg.xyz](https://giant-frogs-brush-bravely.a276.dcdg.xyz)
 
 ## Features
 
@@ -125,6 +130,26 @@ This project follows a clean architecture with a layered approach:
 - **Interfaces:** Defines the HTTP handlers and routes that expose the API to the outside world. Handler methods are auto-bound to the class instance.
 
 A key principle in this architecture is to keep the repository layer free of business logic. Repositories are responsible only for database operations, while use cases enforce business rules and throw domain-specific errors.
+
+## Deployment
+
+This project uses GitHub Actions for automated CI/CD:
+
+- **CI Pipeline**: Runs linting, testing, and security audits on every pull request
+- **CD Pipeline**: Automatically deploys to production when changes are merged to master
+
+📚 **Deployment Documentation:**
+
+- [Full Deployment Guide](docs/DEPLOYMENT.md) - Complete setup and configuration
+- [Quick Reference](docs/DEPLOYMENT_QUICK_REFERENCE.md) - Common commands and troubleshooting
+- [Nginx Configuration Guide](docs/NGINX_GUIDE.md) - Rate limiting and security setup
+
+**Production Server:**
+
+- HTTPS enforced with Let's Encrypt SSL/TLS
+- Rate limiting: 90 requests/minute on `/threads` endpoints
+- Security headers: HSTS, X-Frame-Options, X-Content-Type-Options
+- Health check: [https://giant-frogs-brush-bravely.a276.dcdg.xyz/health](https://giant-frogs-brush-bravely.a276.dcdg.xyz/health)
 
 ## Contributing
 
