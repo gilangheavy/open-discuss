@@ -7,9 +7,8 @@ name: Continuous Deployment
 # Trigger Configuration
 # Runs on direct push to master (typically after PR merge)
 on:
-  push:
-    branches:
-      - master
+  pull_request:
+    branches: [master] 
 
 jobs:
   # Deploy Job - SSH into production server and update application
