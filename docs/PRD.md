@@ -1,4 +1,4 @@
-# Product Requirements Document: Forum API API
+# Product Requirements Document: Forum API
 
 ## 1. Introduction
 
@@ -1088,9 +1088,9 @@ Add to `src/Infrastructures/http/createServer.js`:
 const HapiSwagger = require("hapi-swagger");
 const Inert = require("@hapi/inert");
 const Vision = require("@hapi/vision");
-const path = require('path');
-const fs = require('fs');
-const yaml = require('js-yaml');
+const path = require("path");
+const fs = require("fs");
+const yaml = require("js-yaml");
 
 const createServer = async (container) => {
   const server = Hapi.server({
@@ -1099,8 +1099,8 @@ const createServer = async (container) => {
   });
 
   // Load OpenAPI spec from YAML file
-  const openapiPath = path.join(__dirname, '../../../docs/openapi.yaml');
-  const openapiContent = fs.readFileSync(openapiPath, 'utf8');
+  const openapiPath = path.join(__dirname, "../../../docs/openapi.yaml");
+  const openapiContent = fs.readFileSync(openapiPath, "utf8");
   const openapiSpec = yaml.load(openapiContent);
 
   // Register Swagger documentation (before JWT to avoid auth on /documentation)
@@ -1109,17 +1109,17 @@ const createServer = async (container) => {
     tags: openapiSpec.tags,
     securityDefinitions: {
       jwt: {
-        type: 'apiKey',
-        name: 'Authorization',
-        in: 'header',
-        description: 'JWT Access Token. Format: Bearer {token}',
+        type: "apiKey",
+        name: "Authorization",
+        in: "header",
+        description: "JWT Access Token. Format: Bearer {token}",
       },
     },
     security: [{ jwt: [] }],
-    grouping: 'tags',
-    sortEndpoints: 'ordered',
-    documentationPath: '/documentation',
-    swaggerUIPath: '/documentation/',
+    grouping: "tags",
+    sortEndpoints: "ordered",
+    documentationPath: "/documentation",
+    swaggerUIPath: "/documentation/",
     auth: false,
   };
 
